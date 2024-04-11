@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/map_navgraph"
+    app:startDestination="@id/mapFragment2">
+
+    <fragment
+        android:id="@+id/mapFragment2"
+        android:name="broz.tito.xrenovation.presentation.MapFragment"
+        android:label="fragment_map"
+        tools:layout="@layout/fragment_map" />
+    <navigation android:id="@+id/navigation2"
+        app:startDestination="@id/accountFragment">
+        <fragment
+            android:id="@+id/captchaFragment2"
+            android:name="broz.tito.xrenovation.presentation.CaptchaFragment"
+            android:label="fragment_captcha"
+            tools:layout="@layout/fragment_captcha" />
+        <fragment
+            android:id="@+id/accountFragment"
+            android:name="broz.tito.xrenovation.presentation.AccountFragment"
+            android:label="fragment_account"
+            tools:layout="@layout/fragment_account" >
+            <action
+                android:id="@+id/action_accountFragment_to_captchaFragment2"
+                app:destination="@id/captchaFragment2" />
+        </fragment>
+    </navigation>
+</navigation>

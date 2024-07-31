@@ -6,26 +6,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
+import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.BuildConfig
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentAccountBinding
+import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
+import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModelFactory
-import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-class AccountFragment : Fragment() {
-
-    // TODO MAKE ALL TOASTS & CHECK FAILURES
+class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
 
     private val TAG = "AccountFragment"
 
@@ -39,14 +33,15 @@ class AccountFragment : Fragment() {
     private var signUpDone = false
     private var emailVerified = false
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
             captchaVerified = savedInstanceState.getBoolean(CAPTCHA_VERIFIED_KEY,false)
             signUpDone = savedInstanceState.getBoolean(SIGN_UP_DONE_KEY,false)
             emailVerified = savedInstanceState.getBoolean(EMAIL_VERIFIED_KEY,false)
+        }
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            // FUCK YOU, STUPID NAVIGATION COMPONENT X2
         }
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,signUpByEmailViewModelFactory)[SignUpByEmailViewModel::class.java]
@@ -60,20 +55,24 @@ class AccountFragment : Fragment() {
         binding.buttonSignUpByEmail.setOnClickListener {
             signUpByEmail()
         }
+        binding.textViewAlreadySignedUp.setOnClickListener {
+            findNavController().navigate(R.id.action_accountFragment_to_signInFragment)
+        }
         parentFragmentManager.setFragmentResultListener(CaptchaFragment.CAPTCHA_TOKEN_CODE,this) { result,data ->
             val token = data.getString(CaptchaFragment.CAPTCHA_TOKEN_VALUE,"")
             if (token.isNotEmpty() && !captchaVerified) {
+                hideTextView()
                 viewModel.verifyCaptcha(BuildConfig.CAPTCHA_SERVER_KEY,"0.0.0.0",token)
             }
         }
-        viewModel.verifyCaptchaResult.observe(viewLifecycleOwner, Observer {
+        viewModel.verifyCaptchaResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingCaptchaResult -> {
                     setEditTextEnabled(false)
-                    binding.signUpProgressbar.visibility = View.VISIBLE
+                    showProgressBar()
                 }
                 is SuccessCaptchaResult -> {
-                    binding.signUpProgressbar.visibility = View.GONE
+                    hideProgressBar()
                     setEditTextEnabled(true)
                     if (it.response.status == "ok" && !signUpDone) {
                         captchaVerified = true
@@ -81,27 +80,27 @@ class AccountFragment : Fragment() {
                     }
                     else if (it.response.status != "ok" && !signUpDone) {
                         captchaVerified = true
-                        showSnackBar(getString(R.string.sign_up_error))
+                        showSnackBarShort(this,binding.root,getString(R.string.sign_up_error))
                     }
-
                 }
                 is FailureCaptchaResult -> {
                     setEditTextEnabled(true)
-                    binding.signUpProgressbar.visibility = View.GONE
-                    showSnackBar(getString(R.string.sign_up_error))
+                    hideProgressBar()
+                    showSnackBarShort(this,binding.root,getString(R.string.sign_up_error))
                     captchaVerified = false
+                    showTextView()
                 }
             }
-        })
-        viewModel.signUpResult.observe(viewLifecycleOwner, Observer {
+        }
+
+        viewModel.signUpResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingSignUpByEmailResult -> {
-                    binding.signUpProgressbar.visibility = View.VISIBLE
+                    showProgressBar()
                     setEditTextEnabled(false)
                 }
                 is SuccessSignUpByEmailResult -> {
-                    binding.signUpProgressbar.visibility = View.GONE
-                    Log.d(TAG, "${it.result.email} -- idToken: ${it.result.idToken.subSequence(0,4)} -- localId: ${it.result.localId.subSequence(0,4)}")
+                    hideProgressBar()
                     setEditTextEnabled(true)
                     signUpDone = true
                     if (!emailVerified) {
@@ -111,24 +110,25 @@ class AccountFragment : Fragment() {
 
                 }
                 is FailureSignUpByEmailResult -> {
-                    binding.signUpProgressbar.visibility = View.GONE
+                    showTextView()
+                    hideProgressBar()
                     setEditTextEnabled(true)
                     when (it.errorMessage) {
                         "EMAIL_EXISTS" -> {
-                            showSnackBar(getString(R.string.sign_up_error_email_exists))
+                            showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_email_exists))
                         }
                         "TOO_MANY_ATTEMPTS_TRY_LATER" -> {
-                            showSnackBar(getString(R.string.sign_up_error_many_attempts))
+                            showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
                         }
                         "EXCEPTION_OCCURRED" -> {
-                            showSnackBar(getString(R.string.sign_up_exception))
+                            showSnackBarShort(this,binding.root,getString(R.string.sign_up_exception))
                         }
                     }
                     signUpDone = false
                 }
             }
-        })
-        viewModel.verifyEmailResult.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.verifyEmailResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingVerifyEmailResult-> {
                     setEditTextEnabled(false)
@@ -137,31 +137,30 @@ class AccountFragment : Fragment() {
                 is SuccessVerifyEmailResult -> {
                     setEditTextEnabled(true)
                     if (!emailVerified) {
-                        showSnackBar(getString(R.string.verification_email_sent))
+                        showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
                     }
                     emailVerified = true
+                    findNavController().navigate(R.id.action_accountFragment_to_enterNameFragment)
                 }
                 is FailureVerifyEmailResult -> {
+                    showTextView()
                     setEditTextEnabled(true)
-                    Log.d(TAG, it.javaClass.simpleName)
                     when (it.errorMessage) {
                         "INVALID_ID_TOKEN" -> {
-                            showSnackBar(getString(R.string.invalid_id_token))
+                            showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))
                         }
                         "USER_NOT_FOUND" -> {
-                            showSnackBar(getString(R.string.user_not_found))
+                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
                         }
                         "TOO_MANY_ATTEMPTS_TRY_LATER" -> {
-                            showSnackBar(getString(R.string.sign_up_error_many_attempts))
+                            showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
                         }
                     }
                     emailVerified = false
                 }
 
             }
-        })
-
-
+        }
         return binding.root
     }
 
@@ -172,50 +171,38 @@ class AccountFragment : Fragment() {
         outState.putBoolean(EMAIL_VERIFIED_KEY,emailVerified)
     }
 
-
-
-    fun showSnackBar(text : String) {
-        Snackbar.make(requireContext(),binding.accountFragmentLayout,text,Snackbar.LENGTH_SHORT).show()
+    override fun showProgressBar() {
+        binding.signUpProgressbar.visibility = View.VISIBLE
     }
 
-    fun signUpByEmail() {
+    override fun hideProgressBar() {
+        binding.signUpProgressbar.visibility = View.GONE
+    }
+
+    private fun signUpByEmail() {
         resetState()
         viewModel.resetViewModelState()
-        if (checkIfEmailCorrect(binding.editTextEmailSignUp.text.toString()) && checkIfPasswordsAreSame() && isPasswordStrong()) {
+        if (binding.editTextEmailSignUp.text.toString().checkIfEmailCorrect() && checkIfPasswordsAreSame() && isPasswordStrong()) {
+            hideTextView()
             findNavController().navigate(R.id.action_accountFragment_to_captchaFragment2)
         }
-        else if (!checkIfEmailCorrect(binding.editTextEmailSignUp.text.toString())) {
-            showSnackBar(getString(R.string.incorrect_email))
+        else if (binding.editTextEmailSignUp.text.isNullOrEmpty()) {
+            showSnackBarShort(this,binding.root,getString(R.string.email_is_empty))
+        }
+        else if (!binding.editTextEmailSignUp.text.toString().checkIfEmailCorrect()) {
+            showSnackBarShort(this,binding.root,getString(R.string.incorrect_email))
+        }
+        else if (binding.editTextPasswordSignUp.text.isNullOrEmpty()) {
+            showSnackBarShort(this,binding.root,getString(R.string.password_is_empty))
+        }
+        else if (binding.editTextPasswordConfirmSignUp.text.isNullOrEmpty()) {
+            showSnackBarShort(this,binding.root,getString(R.string.confirm_password))
         }
         else if (!checkIfPasswordsAreSame()) {
-            showSnackBar(getString(R.string.different_passwords))
+            showSnackBarShort(this,binding.root,getString(R.string.different_passwords))
         }
         else if (!isPasswordStrong()) {
-            showSnackBar(getString(R.string.weak_password))
-        }
-    }
-
-    fun checkIfEmailCorrect(email : String) : Boolean {
-        if (!email.contains("@")) {
-           return false
-        }
-        else if (email.indexOf("@") == 0) {
-            return false
-        }
-        else if (email.indexOf("@") == email.length - 1) {
-            return false
-        }
-        else if (!email.contains(".")) {
-            return false
-        }
-        else if (email.drop(email.indexOf("@") + 1).indexOf(".") < 1) {
-            return false
-        }
-        else if (email.drop(email.indexOf(".") + 1).length < 2) {
-            return false
-        }
-        else {
-            return true
+            showSnackBarShort(this,binding.root,getString(R.string.weak_password))
         }
     }
 
@@ -225,13 +212,20 @@ class AccountFragment : Fragment() {
         emailVerified = false
     }
 
-
     private fun checkIfPasswordsAreSame() : Boolean {
         return binding.editTextPasswordSignUp.text.toString() == binding.editTextPasswordConfirmSignUp.text.toString()
     }
 
     private fun isPasswordStrong() : Boolean {
         return binding.editTextPasswordSignUp.text.length > 5
+    }
+
+    private fun hideTextView() {
+        binding.textViewAlreadySignedUp.visibility = View.GONE
+    }
+
+    private fun showTextView() {
+        binding.textViewAlreadySignedUp.visibility = View.VISIBLE
     }
 
     private fun setEditTextEnabled(bool : Boolean) {

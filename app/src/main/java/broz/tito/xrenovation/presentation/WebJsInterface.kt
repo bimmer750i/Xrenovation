@@ -1,7 +1,7 @@
 package broz.tito.xrenovation.presentation
 
-import android.util.Log
 import android.webkit.JavascriptInterface
+import broz.tito.xrenovation.presentation.interfaces.Captchable
 
 class WebJsInterface(val captchable: Captchable) {
 

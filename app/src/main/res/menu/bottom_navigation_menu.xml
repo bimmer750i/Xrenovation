@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/mapFragment2"
+    <item android:id="@+id/navigation2"
         android:title="@string/map"
         android:icon="@drawable/baseline_map_24" />
-    <item android:id="@+id/navigation2"
+    <item android:id="@+id/sign_up_sign_in_navigation"
         android:title="@string/account"
         android:icon="@drawable/baseline_person_24"/>
-    <item android:id="@+id/add"
+    <item android:id="@+id/add_house_navigation"
         android:title="@string/add"
         android:icon="@drawable/baseline_library_add_24"/>
     <item android:id="@+id/settings"

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "885400510638",
+    "firebase_url": "https://xrenovation-f0205-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "xrenovation-f0205",
+    "storage_bucket": "xrenovation-f0205.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885400510638:android:faac56fa2b7a51a206cd3f",
+        "android_client_info": {
+          "package_name": "broz.tito.xrenovation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoaaFJcp4PkuVWN1L_YzJe-Q3peyVDC3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

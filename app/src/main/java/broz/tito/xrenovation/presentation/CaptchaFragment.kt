@@ -8,35 +8,14 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.BuildConfig
-import broz.tito.xrenovation.R
 import broz.tito.xrenovation.databinding.FragmentCaptchaBinding
+import broz.tito.xrenovation.presentation.interfaces.Captchable
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [CaptchaFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class CaptchaFragment : Fragment(),Captchable {
+class CaptchaFragment : Fragment(), Captchable {
 
     private lateinit var binding: FragmentCaptchaBinding
-
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

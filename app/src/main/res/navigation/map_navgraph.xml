@@ -3,15 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/map_navgraph"
-    app:startDestination="@id/mapFragment2">
+    app:startDestination="@id/navigation2">
 
-    <fragment
-        android:id="@+id/mapFragment2"
-        android:name="broz.tito.xrenovation.presentation.MapFragment"
-        android:label="fragment_map"
-        tools:layout="@layout/fragment_map" />
-    <navigation android:id="@+id/navigation2"
-        app:startDestination="@id/accountFragment">
+    <navigation android:id="@+id/sign_up_sign_in_navigation"
+        app:startDestination="@id/routingFragment">
         <fragment
             android:id="@+id/captchaFragment2"
             android:name="broz.tito.xrenovation.presentation.CaptchaFragment"
@@ -25,6 +20,151 @@
             <action
                 android:id="@+id/action_accountFragment_to_captchaFragment2"
                 app:destination="@id/captchaFragment2" />
+            <action
+                android:id="@+id/action_accountFragment_to_signInFragment"
+                app:destination="@id/signInFragment" />
+            <action
+                android:id="@+id/action_accountFragment_to_enterNameFragment"
+                app:destination="@id/enterNameFragment"
+                app:popUpToInclusive="false" />
+        </fragment>
+        <fragment
+            android:id="@+id/signInFragment"
+            android:name="broz.tito.xrenovation.presentation.SignInFragment"
+            android:label="fragment_sign_in"
+            tools:layout="@layout/fragment_sign_in" >
+            <action
+                android:id="@+id/action_signInFragment_to_accountInfoFragment"
+                app:destination="@id/accountInfoFragment"
+                app:popUpTo="@id/sign_up_sign_in_navigation"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_signInFragment_to_enterEmailFragment"
+                app:destination="@id/enterEmailFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/enterNameFragment"
+            android:name="broz.tito.xrenovation.presentation.EnterNameFragment"
+            android:label="fragment_enter_name"
+            tools:layout="@layout/fragment_enter_name" >
+            <action
+                android:id="@+id/action_enterNameFragment_to_accountInfoFragment"
+                app:destination="@id/accountInfoFragment"
+                app:popUpTo="@id/sign_up_sign_in_navigation"
+                app:popUpToInclusive="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/accountInfoFragment"
+            android:name="broz.tito.xrenovation.presentation.AccountInfoFragment"
+            android:label="fragment_account_info"
+            tools:layout="@layout/fragment_account_info" >
+            <action
+                android:id="@+id/action_accountInfoFragment_to_accountFragment"
+                app:destination="@id/accountFragment"
+                app:popUpTo="@id/sign_up_sign_in_navigation"
+                app:popUpToInclusive="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/routingFragment"
+            android:name="broz.tito.xrenovation.presentation.RoutingFragment"
+            android:label="fragment_routing"
+            tools:layout="@layout/fragment_routing" >
+            <action
+                android:id="@+id/action_routingFragment_to_accountFragment"
+                app:destination="@id/accountFragment"
+                app:popUpTo="@id/sign_up_sign_in_navigation"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_routingFragment_to_accountInfoFragment"
+                app:destination="@id/accountInfoFragment"
+                app:popUpTo="@id/sign_up_sign_in_navigation"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_routingFragment_to_noNetworkAccountFragment"
+                app:destination="@id/noNetworkAccountFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/enterEmailFragment"
+            android:name="broz.tito.xrenovation.presentation.EnterEmailFragment"
+            android:label="fragment_enter_email"
+            tools:layout="@layout/fragment_enter_email" />
+        <fragment
+            android:id="@+id/noNetworkAccountFragment"
+            android:name="broz.tito.xrenovation.presentation.NoNetworkAccountFragment"
+            android:label="NoNetworkAccountFragment" />
+    </navigation>
+    <navigation android:id="@+id/add_house_navigation"
+        app:startDestination="@id/addHouseRoutingFragment">
+        <fragment
+            android:id="@+id/addHouseRoutingFragment"
+            android:name="broz.tito.xrenovation.presentation.AddHouseRoutingFragment"
+            android:label="AddHouseRoutingFragment" >
+            <action
+                android:id="@+id/action_addHouseRoutingFragment_to_noNetworkAddHouseFragmentFragment"
+                app:destination="@id/noNetworkAddHouseFragmentFragment" />
+            <action
+                android:id="@+id/action_addHouseRoutingFragment_to_addHouseFragment"
+                app:destination="@id/addHouseFragment"
+                app:popUpTo="@id/add_house_navigation"
+                app:popUpToInclusive="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/noNetworkAddHouseFragmentFragment"
+            android:name="broz.tito.xrenovation.presentation.NoNetworkAddHouseFragment"
+            android:label="NoNetworkAddHouseFragmentFragment" />
+        <fragment
+            android:id="@+id/addHouseFragment"
+            android:name="broz.tito.xrenovation.presentation.AddHouseFragment"
+            android:label="fragment_add_house"
+            tools:layout="@layout/fragment_add_house" >
+            <action
+                android:id="@+id/action_addHouseFragment_to_findHouseOnMapFragment"
+                app:destination="@id/findHouseOnMapFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/findHouseOnMapFragment"
+            android:name="broz.tito.xrenovation.presentation.FindHouseOnMapFragment"
+            android:label="FindHouseOnMapFragment" >
+            <argument
+                android:name="latLon"
+                app:argType="broz.tito.xrenovation.data.add_house.entities.LatLon"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </fragment>
+    </navigation>
+    <navigation android:id="@+id/navigation2"
+        app:startDestination="@id/mapFragment2">
+        <fragment
+            android:id="@+id/mapFragment2"
+            android:name="broz.tito.xrenovation.presentation.MapFragment"
+            android:label="fragment_map"
+            tools:layout="@layout/fragment_map" >
+            <action
+                android:id="@+id/action_mapFragment2_to_houseFragment2"
+                app:destination="@id/houseFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/houseFragment"
+            android:name="broz.tito.xrenovation.presentation.HouseFragment"
+            android:label="HouseFragment" >
+            <argument
+                android:name="house"
+                app:argType="broz.tito.xrenovation.data.add_house.entities.House" />
+            <argument
+                android:name="houseId"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_houseFragment_to_houseCorrectionFragment"
+                app:destination="@id/houseCorrectionFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/houseCorrectionFragment"
+            android:name="broz.tito.xrenovation.presentation.HouseCorrectionFragment"
+            android:label="fragment_house_correction"
+            tools:layout="@layout/fragment_house_correction" >
+            <argument
+                android:name="houseId"
+                app:argType="string" />
         </fragment>
     </navigation>
 </navigation>

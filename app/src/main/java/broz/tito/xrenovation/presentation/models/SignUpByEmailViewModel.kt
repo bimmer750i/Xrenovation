@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class SignUpByEmailViewModel @Inject constructor(val useCase: SignUpByEmailUseCase, val captchaUseCase: VerifyCaptchaUseCase,
-                                                 val sharedPrefsUseCase : SaveSignUpResponseUseCase, val verifyEmailUseCase : SendEmailVerificationCodeUseCase,
+                                                 val sharedPrefsUseCase : SaveAuthResponseUseCase, val verifyEmailUseCase : SendEmailVerificationCodeUseCase,
                                                  val getIdTokenUseCase: GetIdTokenUseCase) : ViewModel() {
 
     private val TAG = "SignUpByEmailViewModel"

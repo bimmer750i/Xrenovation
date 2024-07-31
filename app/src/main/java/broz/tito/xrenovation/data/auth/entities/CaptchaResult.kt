@@ -6,5 +6,5 @@ class PendingCaptchaResult : CaptchaResult()
 
 class SuccessCaptchaResult(val response: CaptchaResponse) : CaptchaResult()
 
-class FailureCaptchaResult() : CaptchaResult()
+class FailureCaptchaResult(val errorMessage : String) : CaptchaResult()
 

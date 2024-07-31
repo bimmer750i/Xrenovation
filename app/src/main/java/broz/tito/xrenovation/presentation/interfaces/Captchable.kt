@@ -1,4 +1,4 @@
-package broz.tito.xrenovation.presentation
+package broz.tito.xrenovation.presentation.interfaces
 
 interface Captchable {
 

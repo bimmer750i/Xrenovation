@@ -24,7 +24,7 @@ interface HouseService {
     @GET("comments/comments{houseId}.json")
     suspend fun getComments(@Path("houseId") houseId : String) : Response<JsonElement>
 
-    @POST("comments/comments{houseId}.json")
+    @POST("comments-suggestions.json")
     suspend fun addComment(@Path("houseId") houseId : String, @Body comment: Comment, @Query("auth") accessToken : String) : Response<AddCommentResponse>
 
     @POST("corrections.json")

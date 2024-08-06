@@ -282,11 +282,11 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             result = FailureAddCommentResult("POST_TIMEOUT")
             Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
-        else if (lastTimePosted != null && now != null) {
+        else  {
             try {
                 val time = Timestamp.now().seconds
                 comment.timeAdded = time
-                val response = houseService.addComment(houseId,comment,accessToken)
+                val response = houseService.addComment(comment,accessToken)
                 if (!response.isSuccessful) {
                     result = FailureAddCommentResult(response.body().toString())
                     Log.d(TAG, "addComment -- failure: ${response.body().toString()}")
@@ -308,10 +308,6 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 result = FailureAddCommentResult(e.message.toString())
                 Log.d(TAG, "addComment -- failure: ${e.message}")
             }
-        }
-        else {
-            result = FailureAddCommentResult("POST_TIMEOUT")
-            Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
         emit(result)
     }.flowOn(Dispatchers.IO)

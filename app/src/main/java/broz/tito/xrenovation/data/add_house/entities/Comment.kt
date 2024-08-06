@@ -3,6 +3,7 @@ package broz.tito.xrenovation.data.add_house.entities
 import com.google.gson.annotations.SerializedName
 
 data class Comment (
+    @SerializedName("houseId") var houseId : String,
     @SerializedName("timeAdded") var timeAdded : Long,
     @SerializedName("displayName") val displayName : String,
     @SerializedName("localId") val localId : String,

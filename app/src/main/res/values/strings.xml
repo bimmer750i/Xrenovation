@@ -92,4 +92,6 @@
     <string name="correction_added">Correction added successfully!</string>
     <string name="post_timeout">You have reached daily limit :(</string>
     <string name="user_not_logged_in">User not logged in</string>
+    <string name="comment_under_moderation">The comment is under moderation</string>
+    <string name="failed_to_send_comment">Failed to send comment</string>
 </resources>

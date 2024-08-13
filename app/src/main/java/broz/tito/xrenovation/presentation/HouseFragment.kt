@@ -3,6 +3,7 @@ package broz.tito.xrenovation.presentation
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -161,10 +162,12 @@ class HouseFragment : Fragment(),SnackBarAble {
 
                 }
                 is SuccessAddCommentResult -> {
-                    viewModel.getComments(houseId!!)
+                    Log.d(TAG, "fragment: successAddCommentResult")
+                    showSnackBarShort(this,binding.root,getString(R.string.comment_under_moderation))
                 }
                 is FailureAddCommentResult -> {
-
+                    Log.d(TAG, "fragment: failureAddCommentResult")
+                    showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
                 }
             }
         })

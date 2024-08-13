@@ -466,7 +466,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
 
 
     companion object {
-        private const val MILLISECONDS_DAY : Long = 86_400_000
+        private const val MILLISECONDS_DAY : Long = 10
     }
 
 

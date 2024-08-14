@@ -78,12 +78,10 @@ class MapFragment : Fragment() {
         viewModel.getPointResult.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is PendingGetPointResult -> {
-                    Log.d(TAG, "pending getHouseResult")
                 }
                 is SuccessGetPointResult -> {
-                    Log.d(TAG, "successfully received array_list: ${it.points}")
                     val resultArrayList = it.points
-                    val myLogo = (getDrawable(requireContext(), R.drawable.baseline_location_on_24) as VectorDrawable).toBitmap()
+                    val myLogo = getDrawable(requireContext(), R.drawable.home_vector_solid)?.toBitmap()
                     resultArrayList.forEach {housePoint ->
                         val listener = MapObjectTapListener { p0, p1 ->
                             viewModel.getHouse(housePoint.houseId)

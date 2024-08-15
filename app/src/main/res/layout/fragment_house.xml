@@ -37,24 +37,25 @@
 
         <TextView
             android:id="@+id/textView_house_address"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:textSize="20sp"
+            android:layout_marginEnd="10dp"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recyclerview_house_photo" />
 
 
-
         <TextView
             android:id="@+id/textView_number_of_floors"
+            style="@style/HouseHeaderStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/number_of_floors"
-            android:textSize="24sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_house_address" />
 
@@ -64,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:textSize="20sp"
+            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_floors" />
 
@@ -75,7 +76,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/number_of_flats"
-            android:textSize="24sp"
+            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_floors_number" />
 
@@ -85,7 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:textSize="20sp"
+            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_flats" />
 
@@ -96,7 +97,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/construction_year"
-            android:textSize="24sp"
+            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_flats_number" />
 
@@ -106,7 +107,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:textSize="20sp"
+            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_construction_year" />
 
@@ -117,7 +118,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/description"
-            android:textSize="24sp"
+            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editText_construction_year" />
 
@@ -142,7 +143,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/links"
-            android:textSize="24sp"
+            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textView_description_text" />
 
@@ -175,7 +176,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/comments"
-            android:textSize="24sp"
+            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/scrollview_chip_group" />
 
@@ -191,33 +192,49 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textView_comments" />
 
+        <TextView
+            android:id="@+id/textView_no_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/no_comments"
+            android:visibility="gone"
+            style="@style/HouseDefaultStyle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recyclerview_comments" />
+
+
         <EditText
             android:id="@+id/editText_comment"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
             android:hint="@string/leave_comment"
             android:inputType="textMultiLine"
-            android:singleLine="false"
-            android:minLines="1"
             android:maxLines="3"
+            android:minLines="1"
+            android:singleLine="false"
+            app:layout_constraintBottom_toTopOf="@id/space_house_bottom"
             app:layout_constraintEnd_toStartOf="@+id/button_comment"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recyclerview_comments"
-            app:layout_constraintBottom_toTopOf="@id/space_house_bottom"/>
+            app:layout_constraintTop_toBottomOf="@+id/textView_no_comments" />
 
-        <Button
+        <com.dd.CircularProgressButton
             android:id="@+id/button_comment"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
-            android:text="@string/send_comment"
+            app:cpb_cornerRadius="25dp"
+            app:cpb_textIdle="@string/send_comment"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@id/space_house_bottom"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recyclerview_comments"
-            app:layout_constraintBottom_toTopOf="@id/space_house_bottom"/>
+            app:layout_constraintTop_toBottomOf="@+id/textView_no_comments" />
 
         <Space
             android:id="@+id/space_house_bottom"

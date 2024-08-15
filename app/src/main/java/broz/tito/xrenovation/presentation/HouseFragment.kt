@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -70,8 +71,13 @@ class HouseFragment : Fragment(),SnackBarAble {
             binding.textViewNumberOfFlatsNumber.text = it.house.flats
             binding.textViewNumberOfFloorsNumber.text = it.house.floors
             binding.textViewDescriptionText.text = it.house.description
-            it.house.links.forEach {
-                addChip(it)
+            if (it.house.links.size == 0) {
+                binding.textViewLinks.visibility = View.GONE
+            }
+            else {
+                it.house.links.forEach {
+                    addChip(it)
+                }
             }
             adapter.list = it.house.photos
             houseId = it.houseId
@@ -159,14 +165,15 @@ class HouseFragment : Fragment(),SnackBarAble {
         viewModel.addCommentResult.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is PendingAddCommentResult -> {
-
+                    binding.buttonComment.isIndeterminateProgressMode = true
+                    binding.buttonComment.progress = 66
                 }
                 is SuccessAddCommentResult -> {
-                    Log.d(TAG, "fragment: successAddCommentResult")
+                    binding.buttonComment.progress = 0
                     showSnackBarShort(this,binding.root,getString(R.string.comment_under_moderation))
                 }
                 is FailureAddCommentResult -> {
-                    Log.d(TAG, "fragment: failureAddCommentResult")
+                    binding.buttonComment.progress = 0
                     showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
                 }
             }
@@ -180,6 +187,9 @@ class HouseFragment : Fragment(),SnackBarAble {
                     if (it.commentsList.size > 0) {
                         binding.recyclerviewComments.visibility = View.VISIBLE
                         commentsAdapter.commentItems = it.commentsList
+                    }
+                    else {
+                        binding.textViewNoComments.visibility = View.VISIBLE
                     }
                 }
                 is FailureGetCommentsResult -> {

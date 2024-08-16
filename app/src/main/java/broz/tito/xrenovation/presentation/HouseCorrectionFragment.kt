@@ -118,12 +118,15 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
         viewModel.addHouseCorrectionResult.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is PendingAddHouseCorrectionResult -> {
-
+                    binding.buttonSendCorrection.isIndeterminateProgressMode = true
+                    binding.buttonSendCorrection.progress = 66
                 }
                 is SuccessAddHouseCorrectionResult -> {
+                    binding.buttonSendCorrection.progress = 0
                     showSnackBarLong(this,binding.root,getString(R.string.correction_added))
                 }
                 is FailureAddHouseCorrectionResult -> {
+                    binding.buttonSendCorrection.progress = 0
                     if (it.errorMessage == "POST_TIMEOUT") {
                         showSnackBarShort(this,binding.root,getString(R.string.post_timeout))
                     }

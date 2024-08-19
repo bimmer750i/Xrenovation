@@ -110,11 +110,12 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun hideProgressBar() {
-        binding.progressBar2.visibility = View.GONE
+        binding.ButtonSignIn.progress = 0
     }
 
     override fun showProgressBar() {
-        binding.progressBar2.visibility = View.VISIBLE
+        binding.ButtonSignIn.isIndeterminateProgressMode = true
+        binding.ButtonSignIn.progress = 66
     }
 
 }

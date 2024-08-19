@@ -95,4 +95,6 @@
     <string name="comment_under_moderation">The comment is under moderation</string>
     <string name="failed_to_send_comment">Failed to send comment</string>
     <string name="no_comments">No comments yet</string>
+    <string name="short_comment">The comment is too short</string>
+    <string name="long_comment">The comment is too long</string>
 </resources>

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.PopupMenu
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
@@ -22,6 +23,7 @@ import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentHouseBinding
 import broz.tito.xrenovation.presentation.adapters.CommentsRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
+import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.HouseFragmentViewModel
 import broz.tito.xrenovation.presentation.models.HouseFragmentViewModelFactory
@@ -29,7 +31,7 @@ import com.google.android.material.chip.Chip
 import javax.inject.Inject
 
 
-class HouseFragment : Fragment(),SnackBarAble {
+class HouseFragment : Fragment(),SnackBarAble,Disablable {
 
     private val TAG = "HouseFragment"
 
@@ -67,7 +69,7 @@ class HouseFragment : Fragment(),SnackBarAble {
         binding.recyclerviewComments.layoutManager = LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false)
         args.let {
             binding.textViewHouseAddress.text = it.house.address
-            binding.editTextConstructionYear.text = it.house.year
+            binding.textviewConstructionYearYear.text = it.house.year
             binding.textViewNumberOfFlatsNumber.text = it.house.flats
             binding.textViewNumberOfFloorsNumber.text = it.house.floors
             binding.textViewDescriptionText.text = it.house.description
@@ -88,7 +90,9 @@ class HouseFragment : Fragment(),SnackBarAble {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonComment.setOnClickListener {
-            viewModel.getAccountInfo(requireContext())
+            if (!binding.buttonComment.isIndeterminateProgressMode) {
+                viewModel.getAccountInfo(requireContext())
+            }
         }
         binding.imageViewSuggestHouseCorrection.setOnClickListener {
             val popupMenu = PopupMenu(requireContext(),binding.imageViewSuggestHouseCorrection)
@@ -102,14 +106,18 @@ class HouseFragment : Fragment(),SnackBarAble {
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingGetAccountInfoResult -> {
-
+                    disableViews()
                 }
                 is SuccessGetAccountInfoResult -> {
                     it.user.emailVerified?.let {verified ->
-                        if (verified) {
+                        if (verified && binding.editTextComment.checkCommentLength()) {
                             viewModel.addComment(requireContext(),houseId!!,binding.editTextComment.text.toString(),it.user.displayName,it.user.localId,it.user.photoUrl)
                         }
+                        else if (!binding.editTextComment.checkCommentLength()) {
+                            enableViews()
+                        }
                         else {
+                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
                         }
                     }
@@ -121,12 +129,17 @@ class HouseFragment : Fragment(),SnackBarAble {
                         }
                         "USER_NOT_FOUND" -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            enableViews()
                         }
                         "USER_DISABLED" -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            enableViews()
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            enableViews()
                         }
                     }
                 }
@@ -138,6 +151,7 @@ class HouseFragment : Fragment(),SnackBarAble {
                     viewModel.getAccountInfo(requireContext())
                 }
                 is FailureRefreshTokenResult -> {
+                    enableViews()
                     when(it.errorMessage) {
                         "TOKEN_EXPIRED" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
@@ -169,10 +183,13 @@ class HouseFragment : Fragment(),SnackBarAble {
                     binding.buttonComment.progress = 66
                 }
                 is SuccessAddCommentResult -> {
+                    enableViews()
+                    binding.editTextComment.text.clear()
                     binding.buttonComment.progress = 0
                     showSnackBarShort(this,binding.root,getString(R.string.comment_under_moderation))
                 }
                 is FailureAddCommentResult -> {
+                    enableViews()
                     binding.buttonComment.progress = 0
                     showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
                 }
@@ -213,6 +230,30 @@ class HouseFragment : Fragment(),SnackBarAble {
             startActivity(browserIntent)
         }
         binding.chipGroupLinks.addView(chip)
+    }
+
+    override fun enableViews() {
+        binding.editTextComment.isEnabled = true
+        binding.buttonComment.isIndeterminateProgressMode = false
+    }
+
+    override fun disableViews() {
+        binding.editTextComment.isEnabled = false
+    }
+
+    fun EditText.checkCommentLength() : Boolean {
+        val text = this.text.toString()
+        if (text.length < 10) {
+            showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.short_comment))
+            return false
+        }
+        else if (text.length > 80) {
+            showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.long_comment))
+            return false
+        }
+        else {
+            return true
+        }
     }
 
 }

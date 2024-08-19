@@ -18,15 +18,17 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <Button
+    <com.dd.CircularProgressButton
         android:id="@+id/button_try_again"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/try_again"
+        android:layout_marginTop="20dp"
+        app:cpb_colorIndicator="@color/cyan"
+        app:cpb_cornerRadius="25dp"
+        app:cpb_selectorIdle="@drawable/cpb_selector"
+        app:cpb_textIdle="@string/try_again"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/textView_try_again"
+        app:layout_constraintStart_toStartOf="@+id/textView_try_again"
         app:layout_constraintTop_toBottomOf="@+id/textView_try_again" />
 </androidx.constraintlayout.widget.ConstraintLayout>

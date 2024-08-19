@@ -172,11 +172,12 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun showProgressBar() {
-        binding.signUpProgressbar.visibility = View.VISIBLE
+        binding.buttonSignUpByEmail.isIndeterminateProgressMode = true
+        binding.buttonSignUpByEmail.progress = 66
     }
 
     override fun hideProgressBar() {
-        binding.signUpProgressbar.visibility = View.GONE
+        binding.buttonSignUpByEmail.progress = 0
     }
 
     private fun signUpByEmail() {

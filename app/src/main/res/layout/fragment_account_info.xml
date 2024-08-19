@@ -110,6 +110,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center"
                     android:paddingEnd="10dp"
+                    android:layout_marginEnd="10dp"
                     app:civ_border_color="@color/black" />
 
                 <TextView
@@ -117,16 +118,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="1" />
 
-                <Button
+                <com.dd.CircularProgressButton
                     android:id="@+id/button_verify_email"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:text="@string/button_send_email_verification"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:layout_margin="10dp"
+                    app:cpb_colorIndicator="@color/cyan"
+                    app:cpb_cornerRadius="25dp"
+                    app:cpb_selectorIdle="@drawable/cpb_selector"
+                    app:cpb_textIdle="@string/button_send_email_verification" />
 
 
             </LinearLayout>

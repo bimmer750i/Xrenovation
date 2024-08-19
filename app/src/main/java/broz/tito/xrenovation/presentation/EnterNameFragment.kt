@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
 
-    private val TAG  = "EnterNameFragment"
+    private val TAG = "EnterNameFragment"
 
     private lateinit var binding: FragmentEnterNameBinding
 
@@ -36,7 +36,8 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             // FUCK YOU, STUPID NAVIGATION COMPONENT X2
         }
-        enterNameViewModel = ViewModelProvider(this,enterNameViewModelFactory)[EnterNameViewModel::class.java]
+        enterNameViewModel =
+            ViewModelProvider(this, enterNameViewModelFactory)[EnterNameViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -50,29 +51,38 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonEnterName.setOnClickListener {
-            enterNameViewModel.setAccountInfo(requireContext(),binding.editTextTextPersonName.text.toString(),null,null)
+            enterNameViewModel.setAccountInfo(
+                requireContext(),
+                binding.editTextTextPersonName.text.toString(),
+                null,
+                null
+            )
         }
         enterNameViewModel.setAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingSetAccountInfoResult -> {
                     showProgressBar()
                 }
+
                 is SuccessSetAccountInfoResult -> {
                     Log.d(TAG, "Success -- ${it.response.displayName} -- ${it.response.email}")
                     hideProgressBar()
                     findNavController().navigate(R.id.action_enterNameFragment_to_accountInfoFragment)
                 }
+
                 is FailureSetAccountInfoResult -> {
                     if (it.errorMessage == "INVALID_ID_TOKEN") {
                         enterNameViewModel.refreshToken(requireContext())
-                    }
-                    else if (it.errorMessage == "USER_NOT_FOUND") {
+                    } else if (it.errorMessage == "USER_NOT_FOUND") {
                         hideProgressBar()
                         findNavController().navigateUp()
-                    }
-                    else {
+                    } else {
                         hideProgressBar()
-                        showSnackBarShort(this,binding.enterNameFragmentLayout,getString(R.string.error_try_again))
+                        showSnackBarShort(
+                            this,
+                            binding.enterNameFragmentLayout,
+                            getString(R.string.error_try_again)
+                        )
                     }
                     hideProgressBar()
                 }
@@ -83,11 +93,22 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 is PendingRefreshTokenResult -> {
                     // Nothing to do here
                 }
+
                 is SuccessRefreshTokenResult -> {
-                    enterNameViewModel.setAccountInfo(requireContext(),binding.editTextTextPersonName.text.toString(),null,null)
+                    enterNameViewModel.setAccountInfo(
+                        requireContext(),
+                        binding.editTextTextPersonName.text.toString(),
+                        null,
+                        null
+                    )
                 }
+
                 is FailureRefreshTokenResult -> {
-                    showSnackBarShort(this,binding.enterNameFragmentLayout,getString(R.string.error_try_again))
+                    showSnackBarShort(
+                        this,
+                        binding.enterNameFragmentLayout,
+                        getString(R.string.error_try_again)
+                    )
                 }
             }
 
@@ -95,11 +116,11 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun showProgressBar() {
-        binding.progressBar3.visibility = View.VISIBLE
+        binding.buttonEnterName.isIndeterminateProgressMode = true
+        binding.buttonEnterName.progress = 66
     }
 
     override fun hideProgressBar() {
-        binding.progressBar3.visibility = View.GONE
+        binding.buttonEnterName.progress = 0
     }
-
 }

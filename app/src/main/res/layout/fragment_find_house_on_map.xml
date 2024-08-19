@@ -20,9 +20,9 @@
 
     <ImageView
         android:id="@+id/imageView_pointer"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/baseline_location_on_24"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/home_vector_solid"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

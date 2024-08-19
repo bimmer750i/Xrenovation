@@ -72,11 +72,12 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun showProgressBar() {
-        binding.progressBarEnterEmail.visibility = View.VISIBLE
+        binding.buttonSendPasswordResetEmail.isIndeterminateProgressMode = true
+        binding.buttonSendPasswordResetEmail.progress = 66
     }
 
     override fun hideProgressBar() {
-        binding.progressBarEnterEmail.visibility = View.GONE
+        binding.buttonSendPasswordResetEmail.progress = 0
     }
 
     private fun sendPasswordResetEmail() {

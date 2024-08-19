@@ -198,17 +198,18 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         viewModel.verifyEmailResult.observe(viewLifecycleOwner)  {
             when (it) {
                 is PendingVerifyEmailResult-> {
-                    showProgressBar()
+                    binding.buttonVerifyEmail.isIndeterminateProgressMode = true
+                    binding.buttonVerifyEmail.progress = 66
                 }
                 is SuccessVerifyEmailResult -> {
-                    hideProgressBar()
+                    binding.buttonVerifyEmail.progress = 0
                     if (!emailVerified) {
                         showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
                     }
                     emailVerified = true
                 }
                 is FailureVerifyEmailResult -> {
-                    hideProgressBar()
+                    binding.buttonVerifyEmail.progress = 0
                     when (it.errorMessage) {
                         "INVALID_ID_TOKEN" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))

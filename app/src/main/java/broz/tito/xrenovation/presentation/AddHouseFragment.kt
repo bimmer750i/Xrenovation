@@ -196,7 +196,8 @@ class AddHouseFragment : Fragment(), SnackBarAble {
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingGetAccountInfoResult -> {
-                    binding.buttonAddHouse.startAnimation()
+                    binding.buttonAddHouse.isIndeterminateProgressMode = true
+                    binding.buttonAddHouse.progress = 66
                     binding.root.isClickable = false
                     binding.buttonAddHouse.isEnabled = false
                 }
@@ -207,7 +208,7 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                         }
                         else {
                             binding.root.isClickable = true
-                            binding.buttonAddHouse.revertAnimation()
+                            binding.buttonAddHouse.progress = 0
                             binding.buttonAddHouse.isEnabled = true
                             // TODO USER NOT VERIFIED SNACKBAR
                         }
@@ -215,7 +216,7 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                 }
                 is FailureGetAccountInfoResult -> {
                     binding.root.isClickable = true
-                    binding.buttonAddHouse.revertAnimation()
+                    binding.buttonAddHouse.progress = 0
                     binding.buttonAddHouse.isEnabled = true
                     when (it.errorMessage) {
                         "INVALID_ID_TOKEN" -> {
@@ -271,20 +272,20 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                     }
                     else if (!it.searchPointAddress.isMoscow(requireContext())) {
                         binding.root.isClickable = true
-                        binding.buttonAddHouse.revertAnimation()
+                        binding.buttonAddHouse.progress = 0
                         binding.buttonAddHouse.isEnabled = true
                         showSnackBarLong(this,binding.root,getString(R.string.not_moscow))
                     }
                     else if (it.searchPointAddress.house.isNullOrEmpty()) {
                         binding.root.isClickable = true
-                        binding.buttonAddHouse.revertAnimation()
+                        binding.buttonAddHouse.progress = 0
                         binding.buttonAddHouse.isEnabled = true
                         showSnackBarLong(this,binding.root,getString(R.string.no_house_in_address))
                     }
                 }
                 is FailureSearchPointResult -> {
                     binding.root.isClickable = true
-                    binding.buttonAddHouse.revertAnimation()
+                    binding.buttonAddHouse.progress = 0
                     binding.buttonAddHouse.isEnabled = true
                 }
             }
@@ -309,7 +310,7 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                 }
                 is FailureLoadPhotosResult -> {
                     binding.root.isClickable = true
-                    binding.buttonAddHouse.revertAnimation()
+                    binding.buttonAddHouse.progress = 0
                     binding.buttonAddHouse.isEnabled = true
                     Log.d(TAG, "failureLoadPhotosResult: ${it.errorMessage}")
                 }
@@ -328,7 +329,7 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                 }
                 is FailureAddHouseResult -> {
                     binding.root.isClickable = true
-                    binding.buttonAddHouse.revertAnimation()
+                    binding.buttonAddHouse.progress = 0
                     binding.buttonAddHouse.isEnabled = true
                 }
             }
@@ -342,12 +343,12 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                     showSnackBarLong(this,binding.root,getString(R.string.house_added))
                     viewModel.resetState()
                     binding.root.isClickable = true
-                    binding.buttonAddHouse.revertAnimation()
+                    binding.buttonAddHouse.progress = 0
                     binding.buttonAddHouse.isEnabled = true
                 }
                 is FailureAddHousePointResult -> {
                     binding.root.isClickable = true
-                    binding.buttonAddHouse.revertAnimation()
+                    binding.buttonAddHouse.progress = 0
                     binding.buttonAddHouse.isEnabled = true
                 }
             }

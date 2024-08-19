@@ -20,6 +20,7 @@
             android:layout_marginTop="10dp"
             android:text="@string/add_house"
             android:textSize="30sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,8 +32,9 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
             android:hint="@string/address"
-            android:minHeight="48dp"
             android:singleLine="true"
+            android:minHeight="50dp"
+            android:background="@drawable/edittext_background_drawable"
             app:layout_constraintEnd_toStartOf="@+id/imageView_address_location"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -70,6 +72,8 @@
             android:importantForAutofill="no"
             android:inputType="number"
             android:singleLine="true"
+            android:minHeight="50dp"
+            android:background="@drawable/edittext_background_drawable"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_floors" />
 
@@ -105,6 +109,8 @@
             android:hint="@string/flats"
             android:inputType="number"
             android:maxLength="4"
+            android:minHeight="50dp"
+            android:background="@drawable/edittext_background_drawable"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_flats" />
 
@@ -129,6 +135,8 @@
             android:hint="@string/year"
             android:inputType="number"
             android:maxLength="4"
+            android:minHeight="50dp"
+            android:background="@drawable/edittext_background_drawable"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_construction_year" />
 
@@ -156,6 +164,8 @@
             android:maxLines="8"
             android:minLines="1"
             android:singleLine="false"
+            android:minHeight="50dp"
+            android:background="@drawable/edittext_background_drawable"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_description" />
@@ -238,19 +248,23 @@
         </HorizontalScrollView>
 
 
-        <com.github.leandroborgesferreira.loadingbutton.customViews.CircularProgressButton
+        <com.dd.CircularProgressButton
             android:id="@+id/button_add_house"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
-            android:text="@string/add_house"
+            app:cpb_colorIndicator="@color/cyan"
+            app:cpb_cornerRadius="25dp"
+            app:cpb_selectorIdle="@drawable/cpb_selector"
+            app:cpb_textIdle="@string/send_comment"
+            app:layout_constraintBottom_toTopOf="@+id/space_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/scrollview_chip_group"
-            app:layout_constraintBottom_toTopOf="@+id/space_bottom"
             app:spinning_bar_padding="6dp" />
+
 
         <Space
             android:id="@+id/space_bottom"

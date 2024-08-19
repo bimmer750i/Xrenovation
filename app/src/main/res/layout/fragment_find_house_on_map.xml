@@ -11,7 +11,7 @@
         android:id="@+id/find_house_mapview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline_10_percent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,27 +23,23 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/baseline_location_on_24"
-        app:layout_constraintBottom_toTopOf="@+id/guideline_10_percent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_10_percent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.85" />
 
     <TextView
         android:id="@+id/textView_search_point"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
         android:textColor="#535151"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline_10_percent"
+        app:layout_constraintBottom_toTopOf="@+id/imageView_go_back"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -51,21 +47,24 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="20dp"
+        android:layout_marginBottom="100dp"
         android:src="@drawable/baseline_arrow_back_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline_10_percent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
+    <com.dd.CircularProgressButton
         android:id="@+id/button_ready"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:text="@string/ready"
+        android:layout_marginBottom="100dp"
+        app:cpb_colorIndicator="@color/cyan"
+        app:cpb_cornerRadius="25dp"
+        app:cpb_selectorIdle="@drawable/cpb_selector"
+        app:cpb_textIdle="@string/ready"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView_go_back"
-        app:layout_constraintTop_toTopOf="@+id/guideline_10_percent" />
+        app:layout_constraintStart_toEndOf="@+id/imageView_go_back" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

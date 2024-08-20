@@ -10,13 +10,14 @@ import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentSignInBinding
+import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.SignInByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignInByEmailViewModelFactory
 import javax.inject.Inject
 
-class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble {
+class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
 
     private val TAG = "SignInFragment"
 
@@ -45,7 +46,9 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.ButtonSignIn.setOnClickListener {
-            signInByEmail()
+            if (!binding.ButtonSignIn.isIndeterminateProgressMode) {
+                signInByEmail()
+            }
         }
         binding.textviewForgotPassword.setOnClickListener {
             findNavController().navigate(R.id.action_signInFragment_to_enterEmailFragment)
@@ -55,19 +58,22 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 is PendingSignInByEmailResult -> {
                     binding.textviewForgotPassword.visibility = View.GONE
                     showProgressBar()
+                    disableViews()
                 }
                 is SuccessSignInByEmailResult -> {
                     findNavController().navigate(R.id.action_signInFragment_to_accountInfoFragment)
                     (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_IN
                     hideProgressBar()
+                    enableViews()
 
                 }
                 is FailureSignInByEmailResult -> {
                     binding.textviewForgotPassword.visibility = View.VISIBLE
                     hideProgressBar()
+                    enableViews()
                     when (it.errorMessage)  {
                         "INVALID_EMAIL" -> {
-
+                            showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.incorrect_email))
                         }
                         "EMAIL_NOT_FOUND" -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.user_not_found))
@@ -110,6 +116,7 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun hideProgressBar() {
+        binding.ButtonSignIn.isIndeterminateProgressMode = false
         binding.ButtonSignIn.progress = 0
     }
 
@@ -118,4 +125,17 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble {
         binding.ButtonSignIn.progress = 66
     }
 
+    override fun enableViews() {
+        binding.apply {
+            editTextEmailSignIn.isEnabled = true
+            editTextPasswordSignIn.isEnabled = true
+        }
+    }
+
+    override fun disableViews() {
+        binding.apply {
+            editTextEmailSignIn.isEnabled = false
+            editTextPasswordSignIn.isEnabled = false
+        }
+    }
 }

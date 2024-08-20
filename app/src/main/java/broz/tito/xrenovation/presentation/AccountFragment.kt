@@ -13,13 +13,14 @@ import broz.tito.xrenovation.BuildConfig
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentAccountBinding
+import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModelFactory
 import javax.inject.Inject
 
-class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
+class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
 
     private val TAG = "AccountFragment"
 
@@ -53,7 +54,9 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
     ): View? {
         binding = FragmentAccountBinding.inflate(layoutInflater)
         binding.buttonSignUpByEmail.setOnClickListener {
-            signUpByEmail()
+            if (!binding.buttonSignUpByEmail.isIndeterminateProgressMode) {
+                signUpByEmail()
+            }
         }
         binding.textViewAlreadySignedUp.setOnClickListener {
             findNavController().navigate(R.id.action_accountFragment_to_signInFragment)
@@ -68,12 +71,12 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
         viewModel.verifyCaptchaResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingCaptchaResult -> {
-                    setEditTextEnabled(false)
                     showProgressBar()
+                    disableViews()
                 }
                 is SuccessCaptchaResult -> {
                     hideProgressBar()
-                    setEditTextEnabled(true)
+                    enableViews()
                     if (it.response.status == "ok" && !signUpDone) {
                         captchaVerified = true
                         viewModel.signUpByEmail(requireContext(),binding.editTextEmailSignUp.text.toString(),binding.editTextPasswordSignUp.text.toString())
@@ -84,7 +87,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
                     }
                 }
                 is FailureCaptchaResult -> {
-                    setEditTextEnabled(true)
+                    enableViews()
                     hideProgressBar()
                     showSnackBarShort(this,binding.root,getString(R.string.sign_up_error))
                     captchaVerified = false
@@ -97,11 +100,11 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
             when (it) {
                 is PendingSignUpByEmailResult -> {
                     showProgressBar()
-                    setEditTextEnabled(false)
+                    disableViews()
                 }
                 is SuccessSignUpByEmailResult -> {
                     hideProgressBar()
-                    setEditTextEnabled(true)
+                    enableViews()
                     signUpDone = true
                     if (!emailVerified) {
                         viewModel.sendEmailVerificationCode(viewModel.getIdToken(requireContext()))
@@ -112,7 +115,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 is FailureSignUpByEmailResult -> {
                     showTextView()
                     hideProgressBar()
-                    setEditTextEnabled(true)
+                    enableViews()
                     when (it.errorMessage) {
                         "EMAIL_EXISTS" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_email_exists))
@@ -131,11 +134,11 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
         viewModel.verifyEmailResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingVerifyEmailResult-> {
-                    setEditTextEnabled(false)
+                    disableViews()
                     Log.d(TAG, it.javaClass.simpleName)
                 }
                 is SuccessVerifyEmailResult -> {
-                    setEditTextEnabled(true)
+                    enableViews()
                     if (!emailVerified) {
                         showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
                     }
@@ -144,7 +147,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is FailureVerifyEmailResult -> {
                     showTextView()
-                    setEditTextEnabled(true)
+                    enableViews()
                     when (it.errorMessage) {
                         "INVALID_ID_TOKEN" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))
@@ -177,7 +180,24 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun hideProgressBar() {
+        binding.buttonSignUpByEmail.isIndeterminateProgressMode = false
         binding.buttonSignUpByEmail.progress = 0
+    }
+
+    override fun enableViews() {
+        binding.apply {
+            editTextEmailSignUp.isEnabled = true
+            editTextPasswordSignUp.isEnabled = true
+            editTextPasswordConfirmSignUp.isEnabled = true
+        }
+    }
+
+    override fun disableViews() {
+        binding.apply {
+            editTextEmailSignUp.isEnabled = false
+            editTextPasswordSignUp.isEnabled = false
+            editTextPasswordConfirmSignUp.isEnabled = false
+        }
     }
 
     private fun signUpByEmail() {
@@ -229,18 +249,6 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble {
         binding.textViewAlreadySignedUp.visibility = View.VISIBLE
     }
 
-    private fun setEditTextEnabled(bool : Boolean) {
-        if (bool) {
-            binding.editTextEmailSignUp.isEnabled = true
-            binding.editTextPasswordSignUp.isEnabled = true
-            binding.editTextPasswordConfirmSignUp.isEnabled = true
-        }
-        else {
-            binding.editTextEmailSignUp.isEnabled = false
-            binding.editTextPasswordSignUp.isEnabled = false
-            binding.editTextPasswordConfirmSignUp.isEnabled = false
-        }
-    }
 
     companion object {
         private val CAPTCHA_VERIFIED_KEY = "CAPTCHA_VERIFIED"

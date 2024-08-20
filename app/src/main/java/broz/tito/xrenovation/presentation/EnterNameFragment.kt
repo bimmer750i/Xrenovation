@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentEnterNameBinding
+import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.EnterNameViewModel
@@ -19,7 +20,7 @@ import broz.tito.xrenovation.presentation.models.EnterNameViewModelFactory
 import javax.inject.Inject
 
 
-class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
+class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
 
     private val TAG = "EnterNameFragment"
 
@@ -51,22 +52,26 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonEnterName.setOnClickListener {
-            enterNameViewModel.setAccountInfo(
-                requireContext(),
-                binding.editTextTextPersonName.text.toString(),
-                null,
-                null
-            )
+            if (!binding.buttonEnterName.isIndeterminateProgressMode) {
+                enterNameViewModel.setAccountInfo(
+                    requireContext(),
+                    binding.editTextTextPersonName.text.toString(),
+                    null,
+                    null
+                )
+            }
         }
         enterNameViewModel.setAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingSetAccountInfoResult -> {
                     showProgressBar()
+                    disableViews()
                 }
 
                 is SuccessSetAccountInfoResult -> {
                     Log.d(TAG, "Success -- ${it.response.displayName} -- ${it.response.email}")
                     hideProgressBar()
+                    enableViews()
                     findNavController().navigate(R.id.action_enterNameFragment_to_accountInfoFragment)
                 }
 
@@ -75,16 +80,17 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
                         enterNameViewModel.refreshToken(requireContext())
                     } else if (it.errorMessage == "USER_NOT_FOUND") {
                         hideProgressBar()
+                        enableViews()
                         findNavController().navigateUp()
                     } else {
                         hideProgressBar()
+                        enableViews()
                         showSnackBarShort(
                             this,
                             binding.enterNameFragmentLayout,
                             getString(R.string.error_try_again)
                         )
                     }
-                    hideProgressBar()
                 }
             }
         }
@@ -104,6 +110,8 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
 
                 is FailureRefreshTokenResult -> {
+                    hideProgressBar()
+                    enableViews()
                     showSnackBarShort(
                         this,
                         binding.enterNameFragmentLayout,
@@ -121,6 +129,15 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun hideProgressBar() {
+        binding.buttonEnterName.isIndeterminateProgressMode = false
         binding.buttonEnterName.progress = 0
+    }
+
+    override fun enableViews() {
+        binding.editTextTextPersonName.isEnabled = true
+    }
+
+    override fun disableViews() {
+        binding.editTextTextPersonName.isEnabled = false
     }
 }

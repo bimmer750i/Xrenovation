@@ -11,6 +11,7 @@ import broz.tito.xrenovation.data.auth.entities.FailureSendPasswordResetEmailRes
 import broz.tito.xrenovation.data.auth.entities.PendingSendPasswordResetEmailResult
 import broz.tito.xrenovation.data.auth.entities.SuccessSendPasswordResetEmailResult
 import broz.tito.xrenovation.databinding.FragmentEnterEmailBinding
+import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.EnterEmailViewModel
@@ -18,7 +19,7 @@ import broz.tito.xrenovation.presentation.models.EnterEmailViewModelFactory
 import javax.inject.Inject
 
 
-class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble {
+class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
 
     private lateinit var binding : FragmentEnterEmailBinding
 
@@ -44,19 +45,24 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonSendPasswordResetEmail.setOnClickListener {
-            sendPasswordResetEmail()
+            if (!binding.buttonSendPasswordResetEmail.isIndeterminateProgressMode) {
+                sendPasswordResetEmail()
+            }
         }
         viewModel.sendPasswordResetEmailResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingSendPasswordResetEmailResult -> {
                     showProgressBar()
+                    disableViews()
                 }
                 is SuccessSendPasswordResetEmailResult -> {
                     hideProgressBar()
+                    enableViews()
                     showSnackBarShort(this,binding.enterEmailFragmentLayout,getString(R.string.password_reset_email_sent))
                 }
                 is FailureSendPasswordResetEmailResult -> {
                     hideProgressBar()
+                    enableViews()
                     when(it.errorMessage) {
                         "EMAIL_NOT_FOUND" -> {
                             showSnackBarShort(this,binding.enterEmailFragmentLayout,getString(R.string.user_not_found))
@@ -77,7 +83,20 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble {
     }
 
     override fun hideProgressBar() {
+        binding.buttonSendPasswordResetEmail.isIndeterminateProgressMode = false
         binding.buttonSendPasswordResetEmail.progress = 0
+    }
+
+    override fun enableViews() {
+        binding.apply {
+            editTextEmailPasswordReset.isEnabled = true
+        }
+    }
+
+    override fun disableViews() {
+        binding.apply {
+            editTextEmailPasswordReset.isEnabled = false
+        }
     }
 
     private fun sendPasswordResetEmail() {

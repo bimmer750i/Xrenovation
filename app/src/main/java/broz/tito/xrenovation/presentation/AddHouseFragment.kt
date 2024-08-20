@@ -29,6 +29,8 @@ import broz.tito.xrenovation.databinding.SimpleDropdownListItemBinding
 import broz.tito.xrenovation.presentation.adapters.PhotoItemTouchHelperCallback
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.adapters.SuggestArrayAdapter
+import broz.tito.xrenovation.presentation.interfaces.Disablable
+import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.AddHouseViewModel
 import broz.tito.xrenovation.presentation.models.AddHouseViewModelFactory
@@ -40,7 +42,7 @@ import java.io.FileOutputStream
 import java.util.UUID
 import javax.inject.Inject
 
-class AddHouseFragment : Fragment(), SnackBarAble {
+class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
 
      private val TAG = "AddHouseFragment"
 
@@ -174,7 +176,9 @@ class AddHouseFragment : Fragment(), SnackBarAble {
             }
         }
         binding.buttonAddHouse.setOnClickListener {
-            addHouse()
+            if (!binding.buttonAddHouse.isIndeterminateProgressMode) {
+                addHouse()
+            }
         }
         viewModel.suggestAddressResult.observe(viewLifecycleOwner) {
             when (it) {
@@ -196,10 +200,8 @@ class AddHouseFragment : Fragment(), SnackBarAble {
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingGetAccountInfoResult -> {
-                    binding.buttonAddHouse.isIndeterminateProgressMode = true
-                    binding.buttonAddHouse.progress = 66
-                    binding.root.isClickable = false
-                    binding.buttonAddHouse.isEnabled = false
+                    showProgressBar()
+                    disableViews()
                 }
                 is SuccessGetAccountInfoResult -> {
                     it.user.emailVerified?.let {verified ->
@@ -207,29 +209,33 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                             viewModel.searchPoint(housePoint!!)
                         }
                         else {
-                            binding.root.isClickable = true
-                            binding.buttonAddHouse.progress = 0
-                            binding.buttonAddHouse.isEnabled = true
-                            // TODO USER NOT VERIFIED SNACKBAR
+                            enableViews()
+                            hideProgressBar()
+                            showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
                         }
                     }
                 }
                 is FailureGetAccountInfoResult -> {
-                    binding.root.isClickable = true
-                    binding.buttonAddHouse.progress = 0
-                    binding.buttonAddHouse.isEnabled = true
                     when (it.errorMessage) {
                         "INVALID_ID_TOKEN" -> {
                             viewModel.refreshToken(requireContext())
                         }
                         "USER_NOT_FOUND" -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
+                            hideProgressBar()
+                            enableViews()
                         }
                         "USER_DISABLED" -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            hideProgressBar()
+                            enableViews()
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            hideProgressBar()
+                            enableViews()
                         }
                     }
                 }
@@ -271,22 +277,19 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                         viewModel.loadPhotosToFireBase(requireContext(),UUID.randomUUID().toString().take(10),photoList)
                     }
                     else if (!it.searchPointAddress.isMoscow(requireContext())) {
-                        binding.root.isClickable = true
-                        binding.buttonAddHouse.progress = 0
-                        binding.buttonAddHouse.isEnabled = true
+                        enableViews()
+                        hideProgressBar()
                         showSnackBarLong(this,binding.root,getString(R.string.not_moscow))
                     }
                     else if (it.searchPointAddress.house.isNullOrEmpty()) {
-                        binding.root.isClickable = true
-                        binding.buttonAddHouse.progress = 0
-                        binding.buttonAddHouse.isEnabled = true
+                        enableViews()
+                        hideProgressBar()
                         showSnackBarLong(this,binding.root,getString(R.string.no_house_in_address))
                     }
                 }
                 is FailureSearchPointResult -> {
-                    binding.root.isClickable = true
-                    binding.buttonAddHouse.progress = 0
-                    binding.buttonAddHouse.isEnabled = true
+                    enableViews()
+                    hideProgressBar()
                 }
             }
         }
@@ -309,9 +312,8 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                     Log.d(TAG, "successLoadPhotosResult: ${it.urlList}")
                 }
                 is FailureLoadPhotosResult -> {
-                    binding.root.isClickable = true
-                    binding.buttonAddHouse.progress = 0
-                    binding.buttonAddHouse.isEnabled = true
+                    enableViews()
+                    hideProgressBar()
                     Log.d(TAG, "failureLoadPhotosResult: ${it.errorMessage}")
                 }
 
@@ -328,9 +330,8 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                     }
                 }
                 is FailureAddHouseResult -> {
-                    binding.root.isClickable = true
-                    binding.buttonAddHouse.progress = 0
-                    binding.buttonAddHouse.isEnabled = true
+                    enableViews()
+                    hideProgressBar()
                 }
             }
         }
@@ -342,14 +343,12 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                 is SuccessAddHousePointResult -> {
                     showSnackBarLong(this,binding.root,getString(R.string.house_added))
                     viewModel.resetState()
-                    binding.root.isClickable = true
-                    binding.buttonAddHouse.progress = 0
-                    binding.buttonAddHouse.isEnabled = true
+                    enableViews()
+                    hideProgressBar()
                 }
                 is FailureAddHousePointResult -> {
-                    binding.root.isClickable = true
-                    binding.buttonAddHouse.progress = 0
-                    binding.buttonAddHouse.isEnabled = true
+                    enableViews()
+                    hideProgressBar()
                 }
             }
         }
@@ -366,6 +365,38 @@ class AddHouseFragment : Fragment(), SnackBarAble {
                 val longitude = bundle.getDouble(FindHouseOnMapFragment.LONGITUDE)
                 housePoint = Point(latitude,longitude)
             }
+        }
+    }
+
+    override fun showProgressBar() {
+        binding.buttonAddHouse.isIndeterminateProgressMode = true
+        binding.buttonAddHouse.progress = 66
+    }
+
+    override fun hideProgressBar() {
+        binding.buttonAddHouse.isIndeterminateProgressMode = false
+        binding.buttonAddHouse.progress = 0
+    }
+
+    override fun enableViews() {
+        binding.apply {
+            editTextNumberOfFlats.isEnabled = true
+            editTextConstructionYear.isEnabled = true
+            editTextNumberOfFloors.isEnabled = true
+            editTextDescription.isEnabled = true
+            buttonAddHouse.isEnabled = true
+            recyclerviewChosenPhoto.visibility = View.VISIBLE
+        }
+    }
+
+    override fun disableViews() {
+        binding.apply {
+            editTextNumberOfFlats.isEnabled = false
+            editTextConstructionYear.isEnabled = false
+            editTextNumberOfFloors.isEnabled = false
+            editTextDescription.isEnabled = false
+            buttonAddHouse.isEnabled = false
+            recyclerviewChosenPhoto.visibility = View.GONE
         }
     }
 

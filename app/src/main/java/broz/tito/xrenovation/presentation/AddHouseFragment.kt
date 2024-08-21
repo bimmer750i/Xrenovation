@@ -249,16 +249,16 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureRefreshTokenResult -> {
                     when(it.errorMessage) {
                         "TOKEN_EXPIRED" -> {
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         "USER_DISABLED" -> {
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         "USER_NOT_FOUND" -> {
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         "MISSING_REFRESH_TOKEN" -> {
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -290,6 +290,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureSearchPointResult -> {
                     enableViews()
                     hideProgressBar()
+                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                 }
             }
         }
@@ -314,7 +315,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureLoadPhotosResult -> {
                     enableViews()
                     hideProgressBar()
-                    Log.d(TAG, "failureLoadPhotosResult: ${it.errorMessage}")
+                    showSnackBarShort(this,binding.root,getString(R.string.failed_to_upload_photos))
                 }
 
             }
@@ -332,6 +333,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureAddHouseResult -> {
                     enableViews()
                     hideProgressBar()
+                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                 }
             }
         }
@@ -349,6 +351,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureAddHousePointResult -> {
                     enableViews()
                     hideProgressBar()
+                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                 }
             }
         }

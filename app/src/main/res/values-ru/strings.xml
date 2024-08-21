@@ -96,4 +96,5 @@
     <string name="no_comments">Без комментариев</string>
     <string name="short_comment">Слишком короткий комментарий</string>
     <string name="long_comment">Слишком длинный комментарий</string>
+    <string name="failed_to_upload_photos">Не удалось загрузить фото на сервер</string>
 </resources>

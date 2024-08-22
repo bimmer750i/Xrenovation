@@ -187,6 +187,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                     binding.editTextComment.text.clear()
                     binding.buttonComment.progress = 0
                     showSnackBarShort(this,binding.root,getString(R.string.comment_under_moderation))
+                    viewModel.resetState()
                 }
                 is FailureAddCommentResult -> {
                     enableViews()

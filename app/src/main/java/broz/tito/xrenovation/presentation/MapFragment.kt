@@ -199,6 +199,7 @@ class MapFragment : Fragment() {
         isShown = false
     }
 
+
     companion object {
         const val ZOOM = "ZOOM"
         const val TARGET = "TARGET"

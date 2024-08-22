@@ -247,6 +247,8 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     viewModel.getAccountInfo(requireContext())
                 }
                 is FailureRefreshTokenResult -> {
+                    enableViews()
+                    hideProgressBar()
                     when(it.errorMessage) {
                         "TOKEN_EXPIRED" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -369,6 +371,11 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 housePoint = Point(latitude,longitude)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "AddHouseFragment --- destroyed !!!")
     }
 
     override fun showProgressBar() {

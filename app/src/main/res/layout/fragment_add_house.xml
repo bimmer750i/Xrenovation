@@ -262,8 +262,7 @@
             app:layout_constraintBottom_toTopOf="@+id/space_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/scrollview_chip_group"
-            app:spinning_bar_padding="6dp" />
+            app:layout_constraintTop_toBottomOf="@id/scrollview_chip_group" />
 
 
         <Space

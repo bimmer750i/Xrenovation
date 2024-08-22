@@ -67,14 +67,18 @@ class HouseFragmentViewModel @Inject constructor(val addCommentUseCase: AddComme
         }
     }
 
-
-
     fun getComments(houseId: String) {
         viewModelScope.launch {
             getCommentsUseCase(houseId).onEach {
                 _getCommentsResult.postValue(it)
             }.collect()
         }
+    }
+
+    fun resetState() {
+        _getAccountInfoResult.postValue(GetAccountInfoResult())
+        _refreshTokenResult.postValue(RefreshTokenResult())
+        _addCommentResult.postValue(AddCommentResult())
     }
 
 }

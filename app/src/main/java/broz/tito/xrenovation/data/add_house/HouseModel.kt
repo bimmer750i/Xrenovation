@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.add_house.entities.*
+import broz.tito.xrenovation.data.add_house.helpers.TimeHelper
 import broz.tito.xrenovation.data.get_houses.entities.FailureGetPointResult
 import broz.tito.xrenovation.data.get_houses.entities.GetPointResult
 import broz.tito.xrenovation.data.get_houses.entities.PendingGetPointResult
@@ -111,11 +112,12 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         }
     }.flowOn(Dispatchers.Main)
 
+    //TODO TEST MODE -- CHANGE TIME CHECK METHOD
     fun loadPhotosToFireBase(localId: String,path: String, list : ArrayList<String>) : Flow<LoadPhotosResult> = flow<LoadPhotosResult> {
         var result : LoadPhotosResult = PendingLoadPhotosResult()
         emit(result)
         val lastTimePosted = getLastTimePosted(localId)
-        val now = getTime()
+        val now = getTime() ?: TimeHelper.getUtcTime()
         if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < MILLISECONDS_DAY)) {
             result = FailureLoadPhotosResult("POST_TIMEOUT")
             Log.d(TAG, "loadPhotosToFireBase -- failure: POST_TIMEOUT")
@@ -143,7 +145,6 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
 
     @Throws(Exception::class)
     private suspend fun loadPhotos(path : String, list : ArrayList<String>) : List<String> = coroutineScope() {
-        Log.d(TAG, "loadPhotos -- orig list : $list")
         val syncedList = Collections.synchronizedList(arrayListOf<String?>(null,null,null,null,null))
         val res = ArrayList<String>()
         val time = System.currentTimeMillis()
@@ -155,10 +156,9 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                     child.putFile(Uri.fromFile(File(uri)))
                         .await().also {
                             if (it.task.isSuccessful) {
-                                Log.d(TAG, "Downloading file-$index took: ${System.currentTimeMillis()-time}")
                                 child.downloadUrl.await().also {
                                     syncedList.add(index,it.toString())
-                                    Log.d(TAG, "Getting file-url-$index took: ${System.currentTimeMillis()-time}")                                }
+                                }
                             }
                             else {
                                 throw Exception("FAILED_TO_DOWNLOAD")
@@ -272,20 +272,20 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         emit(result)
     }.flowOn(Dispatchers.IO)
 
+
     fun addComment(localId: String,houseId: String,comment: Comment, accessToken : String) : Flow<AddCommentResult> = flow {
         var result : AddCommentResult = PendingAddCommentResult()
         emit(result)
         val lastTimePosted = getLastTimePosted(localId)
-        val now = getTime()
+        val now = getTime() ?: TimeHelper.getUtcTime()
         Log.d(TAG, "addComment -- lastTimePosted: ${lastTimePosted?.lastTimePosted}")
         if (lastTimePosted?.lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < MILLISECONDS_DAY)) {
             result = FailureAddCommentResult("POST_TIMEOUT")
             Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
-        else  {
+        else if (lastTimePosted?.lastTimePosted != null && now != null)  {
             try {
-                val time = Timestamp.now().seconds
-                comment.timeAdded = time
+                comment.timeAdded = now
                 val response = houseService.addComment(comment,accessToken)
                 if (!response.isSuccessful) {
                     result = FailureAddCommentResult(response.body().toString())
@@ -296,10 +296,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                         it.name?.let {
                             result = SuccessAddCommentResult(it)
                             Log.d(TAG, "addComment -- success -- $it")
-                            val time = getTime()
-                            time?.let {
-                                addLastTimePosted(localId,LastTimePosted(localId,it),accessToken)
-                            }
+                            addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
                         }
                     }
                 }
@@ -309,6 +306,11 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 Log.d(TAG, "addComment -- failure: ${e.message}")
             }
         }
+        else {
+            result = FailureAddCommentResult("POST_TIMEOUT")
+            Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
+        }
+
         emit(result)
     }.flowOn(Dispatchers.IO)
 
@@ -341,20 +343,18 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         emit(result)
     }.flowOn(Dispatchers.IO)
 
-    // TODO CHECK TIME
     fun addHouseCorrection(localId : String, body : HouseCorrection, accessToken : String) : Flow<AddHouseCorrectionResult> = flow {
         var result : AddHouseCorrectionResult = PendingAddHouseCorrectionResult()
         emit(result)
         val lastTimePosted = getLastTimePosted(localId)
-        val now = getTime()
+        val now = getTime() ?: TimeHelper.getUtcTime()
         if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < MILLISECONDS_DAY)) {
                 result = FailureAddHouseCorrectionResult("POST_TIMEOUT")
                 Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
         }
         else if (lastTimePosted != null && now != null) {
             try {
-                val time = Timestamp.now().seconds
-                body.timeAdded = time*1000
+                body.timeAdded = now
                 val response = houseService.addHouseCorrection(body,accessToken)
                 if (!response.isSuccessful) {
                     result = FailureAddHouseCorrectionResult(response.body().toString())
@@ -364,8 +364,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                     response.body()?.let {
                         it.name?.let {
                             result = SuccessAddHouseCorrectionResult(it)
-                            val time = Timestamp.now().seconds*1000
-                            addLastTimePosted(localId,LastTimePosted(localId,time),accessToken)
+                            addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
                             Log.d(TAG, "addHouseCorrection -- success: $it")
                         }
                     }
@@ -450,7 +449,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 else {
                     var result : Long? = null
                     response.body()?.let {
-                        result = it.unixTime!!*1000
+                        result = it.unixTime!!
                         Log.d(TAG, "getTime -- success $it")
                     }
                     return@async result
@@ -466,7 +465,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
 
 
     companion object {
-        private const val MILLISECONDS_DAY : Long = 10
+        private const val MILLISECONDS_DAY : Long = 86_400_000
     }
 
 

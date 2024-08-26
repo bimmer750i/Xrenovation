@@ -192,7 +192,12 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                 is FailureAddCommentResult -> {
                     enableViews()
                     binding.buttonComment.progress = 0
-                    showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
+                    if (it.errorMessage == "POST_TIMEOUT") {
+                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout))
+                    }
+                    else {
+                        showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
+                    }
                 }
             }
         })

@@ -13,7 +13,11 @@ import broz.tito.xrenovation.R
 import broz.tito.xrenovation.databinding.ChosenPhotoViewholderBinding
 import broz.tito.xrenovation.databinding.DisplayPhotoViewholderBinding
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
 import java.io.File
 import java.security.Key
@@ -56,6 +60,28 @@ class PhotoRecyclerViewAdapter(val viewHolderType : Int,val displayPhotoClickLis
         }
         else if (holder is DisplayPhotoViewHolder) {
             Glide.with(holder.binding.root)
+                .addDefaultRequestListener(object :  RequestListener<Any> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Any>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Any,
+                        model: Any,
+                        target: Target<Any>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        holder.binding.progressBar2.visibility = View.GONE
+                        return false
+                    }
+
+                })
                 .load(list.get(position))
                 .into(holder.binding.imageViewDisplayPhoto)
         }

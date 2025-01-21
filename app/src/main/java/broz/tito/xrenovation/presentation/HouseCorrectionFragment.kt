@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavArgs
 import androidx.navigation.fragment.navArgs
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.add_house.entities.FailureAddHouseCorrectionResult
@@ -55,6 +54,7 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonSendCorrection.setOnClickListener {
             viewModel.getAccountInfo(requireContext())
+            binding.root.hideKeyboard()
         }
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
@@ -86,6 +86,7 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                     }
+                    viewModel.resetModel()
                 }
             }
         }
@@ -112,6 +113,7 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                     }
+                    viewModel.resetModel()
                 }
             }
         }
@@ -124,13 +126,17 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
                 is SuccessAddHouseCorrectionResult -> {
                     binding.buttonSendCorrection.progress = 0
                     showSnackBarLong(this,binding.root,getString(R.string.correction_added))
+                    viewModel.resetModel()
                 }
                 is FailureAddHouseCorrectionResult -> {
                     binding.buttonSendCorrection.progress = 0
                     if (it.errorMessage == "POST_TIMEOUT") {
-                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout))
+                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout_correction))
                     }
-                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                    else {
+                        showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                    }
+                    viewModel.resetModel()
                 }
             }
         })

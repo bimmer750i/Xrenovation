@@ -3,53 +3,43 @@ package broz.tito.xrenovation.data.sharedprefs
 import android.content.Context
 import android.content.SharedPreferences
 
+private const val PREFS_NAME = "SharedPrefsModel"
+
+private const val ID_TOKEN = "ID_TOKEN"
+
+private const val EMAIL = "EMAIL"
+
+private const val REFRESH_TOKEN = "REFRESH_TOKEN"
+
+private const val LOCAL_ID = "LOCAL_ID"
+
+private const val FIRST_START = "FIRST_START"
+
 class SharedPrefsModel {
-
-    private val PREFS_NAME = "SharedPrefsModel"
-
-    private val ID_TOKEN = "ID_TOKEN"
-
-    private val EMAIL = "EMAIL"
-
-    private val REFRESH_TOKEN = "REFRESH_TOKEN"
-
-    private val LOCAL_ID = "LOCAL_ID"
 
     private fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME,Context.MODE_PRIVATE)
     }
 
-    fun saveIdToken(context: Context, idToken : String) {
-        getSharedPrefs(context).edit().putString(ID_TOKEN,idToken).apply()
-    }
+    fun isFirstStart(context: Context) : Boolean = getSharedPrefs(context).getBoolean(FIRST_START,true)
 
-    fun saveEmailAddress(context: Context,email : String) {
-        getSharedPrefs(context).edit().putString(EMAIL,email).apply()
-    }
+    fun setFirstStartCompleted(context: Context) = getSharedPrefs(context).edit().putBoolean(FIRST_START,false).apply()
 
-    fun saveRefreshToken(context: Context,refreshToken : String) {
-        getSharedPrefs(context).edit().putString(REFRESH_TOKEN,refreshToken).apply()
-    }
+    fun saveIdToken(context: Context, idToken : String) = getSharedPrefs(context).edit().putString(ID_TOKEN,idToken).apply()
 
-    fun saveLocalId(context: Context, localId : String) {
-        getSharedPrefs(context).edit().putString(LOCAL_ID,localId).apply()
-    }
+    fun saveEmailAddress(context: Context,email : String) = getSharedPrefs(context).edit().putString(EMAIL,email).apply()
 
-    fun getIdToken(context: Context) : String {
-        return getSharedPrefs(context).getString(ID_TOKEN,"") ?: ""
-    }
+    fun saveRefreshToken(context: Context,refreshToken : String) = getSharedPrefs(context).edit().putString(REFRESH_TOKEN,refreshToken).apply()
 
-    fun getEmailAddress(context: Context) : String {
-        return getSharedPrefs(context).getString(EMAIL,"") ?: ""
-    }
+    fun saveLocalId(context: Context, localId : String) = getSharedPrefs(context).edit().putString(LOCAL_ID,localId).apply()
 
-    fun getRefreshToken(context: Context) : String {
-        return getSharedPrefs(context).getString(REFRESH_TOKEN,"") ?: ""
-    }
+    fun getIdToken(context: Context) : String = getSharedPrefs(context).getString(ID_TOKEN,"") ?: ""
 
-    fun getLocalId(context: Context) : String {
-        return getSharedPrefs(context).getString(LOCAL_ID,"") ?: ""
-    }
+    fun getEmailAddress(context: Context) : String = getSharedPrefs(context).getString(EMAIL,"") ?: ""
+
+    fun getRefreshToken(context: Context) : String = getSharedPrefs(context).getString(REFRESH_TOKEN,"") ?: ""
+
+    fun getLocalId(context: Context) : String = getSharedPrefs(context).getString(LOCAL_ID,"") ?: ""
 
 
 }

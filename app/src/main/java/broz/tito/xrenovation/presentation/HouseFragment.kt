@@ -7,9 +7,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.PopupMenu
-import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -83,15 +83,27 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             }
             adapter.list = it.house.photos
             houseId = it.houseId
+            parentFragmentManager.setFragmentResult(MapFragment.SHOULD_OPEN,Bundle().putHouse(it.house))
         }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.root.addOnLayoutChangeListener { view, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
+            val heightwas = topWas-bottomWas
+            if (view.height < heightwas) {
+                binding.houseFragmentNestedScrollview.scrollTo(0,binding.root.bottom)
+            }
+            else {
+                // DO SOMETHING
+            }
+        }
         binding.buttonComment.setOnClickListener {
             if (!binding.buttonComment.isIndeterminateProgressMode) {
                 viewModel.getAccountInfo(requireContext())
+                binding.root.hideKeyboard()
             }
         }
         binding.imageViewSuggestHouseCorrection.setOnClickListener {
@@ -99,6 +111,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             popupMenu.menuInflater.inflate(R.menu.house_fragment_menu,popupMenu.menu)
             popupMenu.setOnMenuItemClickListener {
                     val directions = HouseFragmentDirections.actionHouseFragmentToHouseCorrectionFragment(houseId!!)
+                viewModel.resetCommentState()
                     findNavController().navigate(directions)
                 true }
             popupMenu.show()
@@ -155,19 +168,15 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                     when(it.errorMessage) {
                         "TOKEN_EXPIRED" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         "USER_DISABLED" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         "USER_NOT_FOUND" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         "MISSING_REFRESH_TOKEN" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_logged_in))
-                            //findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -193,11 +202,12 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                     enableViews()
                     binding.buttonComment.progress = 0
                     if (it.errorMessage == "POST_TIMEOUT") {
-                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout))
+                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout_comment))
                     }
                     else {
                         showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
                     }
+                    viewModel.resetState()
                 }
             }
         })
@@ -226,6 +236,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         super.onStart()
         viewModel.getComments(houseId!!)
     }
+
 
     private fun addChip(text : String) {
         val chip = Chip(requireContext())
@@ -262,4 +273,16 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         }
     }
 
+    /*private fun showBottomNavigationView() {
+        (childFragmentManager.findFragmentById(R.id.mainFragment) as MainFragment).showBottomNavigationView()
+    }
+
+    private fun hideBottomNavigationView() {
+        (childFragmentManager.findFragmentById(R.id.mainFragment) as MainFragment).hideBottomNavigationView()
+    }*/
+
+    fun Bundle.putHouse(house: House) : Bundle {
+        this.putSerializable(MapFragment.HOUSE,house)
+        return this
+    }
 }

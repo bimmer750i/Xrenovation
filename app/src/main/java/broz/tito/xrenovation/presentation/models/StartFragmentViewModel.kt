@@ -32,4 +32,8 @@ class StartFragmentViewModel @Inject constructor(val useCase: RefreshTokenUseCas
         }
     }
 
+    fun isFirstStart(context: Context) : Boolean = sharedPrefsModel.isFirstStart(context)
+
+    fun setFirstStartCompleted(context: Context) = sharedPrefsModel.setFirstStartCompleted(context)
+
 }

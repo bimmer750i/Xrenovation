@@ -26,11 +26,12 @@
     <string name="editTextPersonName">Имя</string>
     <string name="enter_name_textview">Добро пожаловать в xRenovation! \n Пожалуйста, введите ваше имя</string>
     <string name="button_enter_name">Продолжить</string>
-    <string name="hi_someone">Привет, </string>
-    <string name="button_send_email_verification">Отправить email</string>
+    <string name="hi_someone">Привет,\u0020</string>
+    <string name="button_send_email_verification">Подтвердить</string>
     <string name="email_verified">Email подтверждён</string>
     <string name="email_not_verified">Email не подтверждён</string>
     <string name="get_account_info_error">Ошибка, попробуйте позже :(</string>
+    <string name="missing_refresh_token_error">Войдите в аккаунт или зарегистрируйтесь</string>
     <string name="log_out">Выйти</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -89,12 +90,16 @@
     <string name="comments">Комментарии</string>
     <string name="suggest_house_correction">Предложить правку</string>
     <string name="correction_added">Правка успешно добавлена</string>
-    <string name="post_timeout">Вы достигли ежедневного лимита :(</string>
-    <string name="user_not_logged_in">Войдите в аккаунт</string>
+    <string name="post_timeout_house">Таймаут, добавьте дом чуть позже</string>
+    <string name="post_timeout_comment">Таймаут, добавьте комментарий чуть позже</string>
+    <string name="post_timeout_correction">Таймаут, добавьте правку чуть позже</string>
+    <string name="user_not_logged_in">Войдите в аккаунт или зарегистрируйтесь</string>
     <string name="comment_under_moderation">Комментарий на модерации</string>
     <string name="failed_to_send_comment">Ошибка отправки комментария</string>
     <string name="no_comments">Без комментариев</string>
-    <string name="short_comment">Слишком короткий комментарий</string>
-    <string name="long_comment">Слишком длинный комментарий</string>
+    <string name="short_comment">Минимум 10 символов</string>
+    <string name="long_comment">Максимум 80 символов</string>
     <string name="failed_to_upload_photos">Не удалось загрузить фото на сервер</string>
+    <string name="continue_to_xrenovation">Продолжить</string>
+    <string name="welcome_text">Добро пожаловать в xRenovation!\n\n Это место, где можно обсуждать и добавлять дома, построенные по программе реновации, а также предлгагать свои правки в добавленные дома.\nПравила несложные:\n\n1) Предлагаемые дома могут быть построены/строящимися по программе реновации. Информация о доме должна соответствовать действительности, в случае недостоверной информации Администрация может не добавить дом на карту, либо исправить её.\n\n2) Комментарии должны относиться к конкретному дому, а не к чему либо ещё. Администрация может не опубликовать комментарий в случае несоответствия требованию.\n\n3) Вносимые правки должны относиться к конкретному дому, а не к чему либо ещё. Администрация может не принять в случае несоответствия требованию.\n\n4) В случае предложения резких политических высказываний и материалов характера 18+ или другог противоречивого контента аккаунт пользователя будет заблокирован и материал не будет опубликован.\n\n5) Нажимая на кнопку \"Продолжить\" Вы соглашаетесь с вышеперечисленными правилами.</string>
 </resources>

@@ -106,11 +106,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                     hideProgressBar()
                     enableViews()
                     signUpDone = true
-                    if (!emailVerified) {
-                        viewModel.sendEmailVerificationCode(viewModel.getIdToken(requireContext()))
-                        Log.d(TAG, "Trying to verify email with token: ${viewModel.getIdToken(requireContext())}")
-                    }
-
+                    findNavController().navigate(R.id.action_accountFragment_to_enterNameFragment)
                 }
                 is FailureSignUpByEmailResult -> {
                     showTextView()
@@ -129,39 +125,6 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                     }
                     signUpDone = false
                 }
-            }
-        }
-        viewModel.verifyEmailResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is PendingVerifyEmailResult-> {
-                    disableViews()
-                    Log.d(TAG, it.javaClass.simpleName)
-                }
-                is SuccessVerifyEmailResult -> {
-                    enableViews()
-                    if (!emailVerified) {
-                        showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
-                    }
-                    emailVerified = true
-                    findNavController().navigate(R.id.action_accountFragment_to_enterNameFragment)
-                }
-                is FailureVerifyEmailResult -> {
-                    showTextView()
-                    enableViews()
-                    when (it.errorMessage) {
-                        "INVALID_ID_TOKEN" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))
-                        }
-                        "USER_NOT_FOUND" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                        }
-                        "TOO_MANY_ATTEMPTS_TRY_LATER" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
-                        }
-                    }
-                    emailVerified = false
-                }
-
             }
         }
         return binding.root

@@ -18,8 +18,8 @@ import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentAccountInfoBinding
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
-import broz.tito.xrenovation.presentation.models.GetAccountInfoViewModel
-import broz.tito.xrenovation.presentation.models.GetAccountInfoViewModelFactory
+import broz.tito.xrenovation.presentation.models.AccountInfoViewModel
+import broz.tito.xrenovation.presentation.models.AccountInfoViewModelFactory
 import com.bumptech.glide.Glide
 import java.io.File
 import java.io.FileOutputStream
@@ -34,9 +34,9 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
     private lateinit var binding : FragmentAccountInfoBinding
 
     @Inject
-    lateinit var getAccountInfoViewModelFactory: GetAccountInfoViewModelFactory
+    lateinit var accountInfoViewModelFactory: AccountInfoViewModelFactory
 
-    private lateinit var viewModel : GetAccountInfoViewModel
+    private lateinit var viewModel : AccountInfoViewModel
 
     lateinit var pickMedia : ActivityResultLauncher<PickVisualMediaRequest>
 
@@ -50,7 +50,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         }
         registerForActivityResult()
         (requireActivity().application as App).appComponent.inject(this)
-        viewModel = ViewModelProvider(this,getAccountInfoViewModelFactory)[GetAccountInfoViewModel::class.java]
+        viewModel = ViewModelProvider(this,accountInfoViewModelFactory)[AccountInfoViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -207,6 +207,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                         showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
                     }
                     emailVerified = true
+                    viewModel.resetGetAccountInfoViewModelState()
                 }
                 is FailureVerifyEmailResult -> {
                     binding.buttonVerifyEmail.progress = 0
@@ -222,8 +223,8 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                         }
                     }
                     emailVerified = false
+                    viewModel.resetGetAccountInfoViewModelState()
                 }
-
             }
         }
 
@@ -231,11 +232,6 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
             viewModel.getAccountInfo(requireContext())
             isLoaded = true
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.resetGetAccountInfoViewModelState()
     }
 
     private fun registerForActivityResult() {

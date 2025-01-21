@@ -2,6 +2,7 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/house_fragment_nested_scrollview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -61,64 +62,64 @@
 
         <TextView
             android:id="@+id/textView_number_of_floors_number"
+            style="@style/HouseDefaultStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_floors" />
 
         <TextView
             android:id="@+id/textView_number_of_flats"
+            style="@style/HouseHeaderStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/number_of_flats"
-            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_floors_number" />
 
         <TextView
             android:id="@+id/textView_number_of_flats_number"
+            style="@style/HouseDefaultStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_flats" />
 
         <TextView
             android:id="@+id/textView_construction_year"
+            style="@style/HouseHeaderStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/construction_year"
-            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_number_of_flats_number" />
 
         <TextView
             android:id="@+id/textview_construction_year_year"
+            style="@style/HouseDefaultStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_construction_year" />
 
         <TextView
             android:id="@+id/textView_description"
+            style="@style/HouseHeaderStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/description"
-            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textview_construction_year_year" />
 
@@ -138,21 +139,21 @@
 
         <TextView
             android:id="@+id/textView_links"
+            style="@style/HouseHeaderStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/links"
-            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textView_description_text" />
 
         <HorizontalScrollView
+            android:id="@+id/scrollview_chip_group"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:id="@+id/scrollview_chip_group"
             android:scrollbars="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -166,17 +167,17 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView_links"
-                app:singleLine="true"/>
+                app:singleLine="true" />
         </HorizontalScrollView>
 
         <TextView
             android:id="@+id/textView_comments"
+            style="@style/HouseHeaderStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/comments"
-            style="@style/HouseHeaderStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/scrollview_chip_group" />
 
@@ -194,13 +195,13 @@
 
         <TextView
             android:id="@+id/textView_no_comments"
+            style="@style/HouseDefaultStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:text="@string/no_comments"
             android:visibility="gone"
-            style="@style/HouseDefaultStyle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recyclerview_comments" />
 
@@ -214,11 +215,11 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/edittext_background_drawable"
             android:hint="@string/leave_comment"
-            android:inputType="textMultiLine"
+            android:inputType="textCapSentences|textMultiLine"
             android:maxLines="5"
+            android:minHeight="50dp"
             android:minLines="1"
             android:singleLine="false"
-            android:minHeight="50dp"
             app:layout_constraintBottom_toTopOf="@id/space_house_bottom"
             app:layout_constraintEnd_toStartOf="@+id/button_comment"
             app:layout_constraintHorizontal_bias="1.0"
@@ -231,10 +232,10 @@
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
+            app:cpb_colorIndicator="@color/cyan"
             app:cpb_cornerRadius="25dp"
             app:cpb_selectorIdle="@drawable/cpb_selector"
             app:cpb_textIdle="@string/send_comment"
-            app:cpb_colorIndicator="@color/cyan"
             app:layout_constraintBottom_toTopOf="@id/space_house_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_no_comments" />
@@ -242,7 +243,8 @@
         <Space
             android:id="@+id/space_house_bottom"
             android:layout_width="0dp"
-            android:layout_height="150dp"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/textView_links"
             app:layout_constraintStart_toStartOf="parent" />

@@ -57,8 +57,10 @@ class PhotoRecyclerViewAdapter(val viewHolderType : Int,val displayPhotoClickLis
                 .load(Uri.fromFile(File(list.get(position))))
                 .signature(ObjectKey(File(list.get(position)).lastModified()))
                 .into(holder.binding.imageViewPhoto)
+
         }
         else if (holder is DisplayPhotoViewHolder) {
+            holder.binding.progressBar2.visibility = View.VISIBLE
             Glide.with(holder.binding.root)
                 .addDefaultRequestListener(object :  RequestListener<Any> {
                     override fun onLoadFailed(

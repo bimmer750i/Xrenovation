@@ -9,21 +9,20 @@ import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.data.sharedprefs.SharedPrefsModel
 import broz.tito.xrenovation.domain.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
-class GetAccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCase,
-                                                  val refreshTokenUseCase: RefreshTokenUseCase,
-                                                  val saveAuthResponseUseCase: SaveAuthResponseUseCase,
-                                                  val logOutUseCase: LogOutUseCase,
-                                                  val uploadProfilePictureUseCase: UploadProfilePictureUseCase,
-                                                  val setAccountInfoUseCase: SetAccountInfoUseCase,
-                                                  val verifyEmailUseCase : SendEmailVerificationCodeUseCase,
-                                                  val sharedPrefsModel: SharedPrefsModel) : ViewModel() {
+class AccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCase,
+                                               val refreshTokenUseCase: RefreshTokenUseCase,
+                                               val saveAuthResponseUseCase: SaveAuthResponseUseCase,
+                                               val logOutUseCase: LogOutUseCase,
+                                               val uploadProfilePictureUseCase: UploadProfilePictureUseCase,
+                                               val setAccountInfoUseCase: SetAccountInfoUseCase,
+                                               val verifyEmailUseCase : SendEmailVerificationCodeUseCase,
+                                               val sharedPrefsModel: SharedPrefsModel) : ViewModel() {
 
     private val _getAccountInfoResult = MutableLiveData<GetAccountInfoResult>()
     val getAccountInfoResult : LiveData<GetAccountInfoResult> = _getAccountInfoResult
@@ -91,6 +90,7 @@ class GetAccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUse
         _refreshTokenResult.postValue(RefreshTokenResult())
         _uploadProfilePictureResult.postValue(UploadProfilePictureResult())
         _setAccountInfoResult.postValue(SetAccountInfoResult())
+        _verifyEmailResult.postValue(VerifyEmailResult())
     }
 
 }

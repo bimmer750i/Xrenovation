@@ -33,6 +33,8 @@ interface AppComponent {
 
     fun inject(houseCorrectionFragment: HouseCorrectionFragment)
 
+    fun inject(welcomeFragment: WelcomeFragment)
+
     @Component.Builder
     interface Builder {
 

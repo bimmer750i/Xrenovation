@@ -19,13 +19,16 @@
             tools:layout="@layout/fragment_account" >
             <action
                 android:id="@+id/action_accountFragment_to_captchaFragment2"
-                app:destination="@id/captchaFragment2" />
+                app:destination="@id/captchaFragment2"
+                app:enterAnim="@android:anim/slide_in_left" />
             <action
                 android:id="@+id/action_accountFragment_to_signInFragment"
-                app:destination="@id/signInFragment" />
+                app:destination="@id/signInFragment"
+                app:enterAnim="@android:anim/slide_in_left" />
             <action
                 android:id="@+id/action_accountFragment_to_enterNameFragment"
                 app:destination="@id/enterNameFragment"
+                app:enterAnim="@android:anim/slide_in_left"
                 app:popUpToInclusive="false" />
         </fragment>
         <fragment
@@ -40,7 +43,8 @@
                 app:popUpToInclusive="true" />
             <action
                 android:id="@+id/action_signInFragment_to_enterEmailFragment"
-                app:destination="@id/enterEmailFragment" />
+                app:destination="@id/enterEmailFragment"
+                app:enterAnim="@android:anim/slide_in_left" />
         </fragment>
         <fragment
             android:id="@+id/enterNameFragment"

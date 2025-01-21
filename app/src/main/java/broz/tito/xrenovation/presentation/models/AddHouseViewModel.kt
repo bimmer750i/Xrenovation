@@ -93,6 +93,7 @@ class AddHouseViewModel @Inject constructor(val getAccountInfoUseCase: GetAccoun
     }
 
     fun addHouse(context: Context,name : String, house : House) {
+        house.localid = sharedPrefsModel.getLocalId(context)
         viewModelScope.launch(Dispatchers.IO) {
             addHouseUseCase(sharedPrefsModel.getLocalId(context),"$name.json", house,sharedPrefsModel.getIdToken(context)).onEach {
                 _addHouseResult.postValue(it)

@@ -27,11 +27,12 @@
     <string name="editTextPersonName">Name</string>
     <string name="enter_name_textview">Welcome to xRenovation! \n Enter your name, please</string>
     <string name="button_enter_name">Enter</string>
-    <string name="hi_someone">Hi, </string>
+    <string name="hi_someone">Hi,\u0020</string>
     <string name="button_send_email_verification">Send email</string>
     <string name="email_verified">Email verified</string>
     <string name="email_not_verified">Email not verified</string>
     <string name="get_account_info_error">Error, please try again :(</string>
+    <string name="missing_refresh_token_error">Log into yor account or sign up</string>
     <string name="log_out">Log out</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -90,12 +91,16 @@
     <string name="comments">Comments</string>
     <string name="suggest_house_correction">Suggest correction</string>
     <string name="correction_added">Correction added successfully!</string>
-    <string name="post_timeout">You have reached daily limit :(</string>
-    <string name="user_not_logged_in">User not logged in</string>
+    <string name="post_timeout_house">Timeout, upload your house later, please</string>
+    <string name="post_timeout_comment">Timeout, add your comment later, please</string>
+    <string name="post_timeout_correction">Timeout, add your correction later, please</string>
+    <string name="user_not_logged_in">Log into yor account or sign up</string>
     <string name="comment_under_moderation">The comment is under moderation</string>
     <string name="failed_to_send_comment">Failed to send comment</string>
     <string name="no_comments">No comments yet</string>
-    <string name="short_comment">The comment is too short</string>
-    <string name="long_comment">The comment is too long</string>
+    <string name="short_comment">Should be at least 10 symbols</string>
+    <string name="long_comment">Should be less than 80 symbols</string>
     <string name="failed_to_upload_photos">Failed to upload photos</string>
+    <string name="continue_to_xrenovation">Continue</string>
+    <string name="welcome_text">Welcome to xRenovation!\n\n This is a place where you can discuss or add houses built during the Renovation program, you can also suggest a correction to existing houses.\nThe rules are simple:\n\n1) Suggested houses must be built/being built under the Renovation program. Information about house must be relevant, in case of irrelevant information the Administration might not approve the suggested house or edit the information.\n\n2) Comments should relate to a specific house, not to anything else. The administration may not publish a comment in case of non-compliance with the requirement.\n\n3) The corrections you make should relate to a specific house, not to anything else. The administration may not accept the correction in case of non-compliance with the requirement.\n\n4) In case of offering harsh political statements and materials of the nature of 18+ or other controversial content, the user\'s account will be blocked and the material will not be published.\n\n5) By clicking the \"Continue\" button you confirm that you agree with the rules listed above</string>
 </resources>

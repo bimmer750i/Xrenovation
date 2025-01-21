@@ -1,6 +1,7 @@
 package broz.tito.xrenovation.presentation
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import broz.tito.xrenovation.BuildConfig
 import broz.tito.xrenovation.data.auth.entities.LoggedStatus
 import broz.tito.xrenovation.data.auth.entities.NetworkStatus
@@ -18,6 +19,7 @@ class App : Application() {
     var networkStatus : NetworkStatus = NetworkStatus.UNDEFINED
 
     override fun onCreate() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         super.onCreate()
         FirebaseApp.initializeApp(this)
         appComponent = DaggerAppComponent

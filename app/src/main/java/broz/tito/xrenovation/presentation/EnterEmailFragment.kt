@@ -56,11 +56,13 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable
                     disableViews()
                 }
                 is SuccessSendPasswordResetEmailResult -> {
+                    viewModel.resetEnterEmailViewModel()
                     hideProgressBar()
                     enableViews()
                     showSnackBarShort(this,binding.enterEmailFragmentLayout,getString(R.string.password_reset_email_sent))
                 }
                 is FailureSendPasswordResetEmailResult -> {
+                    viewModel.resetEnterEmailViewModel()
                     hideProgressBar()
                     enableViews()
                     when(it.errorMessage) {

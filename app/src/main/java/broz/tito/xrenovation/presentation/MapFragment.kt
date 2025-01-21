@@ -1,15 +1,13 @@
 package broz.tito.xrenovation.presentation
 
-import android.animation.Animator
-import android.animation.Animator.AnimatorListener
-import android.graphics.drawable.VectorDrawable
+import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation.AnimationListener
 import android.view.animation.TranslateAnimation
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.graphics.drawable.toBitmap
@@ -19,7 +17,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.add_house.entities.House
-import broz.tito.xrenovation.data.add_house.entities.LatLon
 import broz.tito.xrenovation.data.add_house.entities.SuccessGetHouseResult
 import broz.tito.xrenovation.data.get_houses.entities.FailureGetPointResult
 import broz.tito.xrenovation.data.get_houses.entities.PendingGetPointResult
@@ -28,29 +25,16 @@ import broz.tito.xrenovation.databinding.FragmentMapBinding
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.models.MapFragmentViewModel
 import broz.tito.xrenovation.presentation.models.MapFragmentViewModelFactory
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraListener
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.CameraUpdateReason
-import com.yandex.mapkit.map.Map
-import com.yandex.mapkit.map.MapObject
 import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MapFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class MapFragment : Fragment() {
 
     private val TAG = "MapFragment"
@@ -74,7 +58,8 @@ class MapFragment : Fragment() {
 
     private val listenerList = ArrayList<MapObjectTapListener>()
 
-    private val cameraListener = CameraListener { p0, p1, p2, p3 -> if (isShown) {
+    private val cameraListener = CameraListener { p0, p1, p2, p3 -> if (isShown && p2 == CameraUpdateReason.GESTURES) {
+        Log.d(TAG, "HIDDEN BECAUSE OF GESTURE")
         hideBottomView()
     } }
 
@@ -95,15 +80,21 @@ class MapFragment : Fragment() {
         }
     }
 
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (savedInstanceState != null) {
-            zoom = savedInstanceState.getFloat(ZOOM)
-            val latLon = savedInstanceState.getSerializable(TARGET) as LatLon
-            startLocation = Point(latLon.latitude,latLon.longitude)
-        }
         binding.recyclerviewBottom.adapter = recyclerViewAdapter
         binding.recyclerviewBottom.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+        parentFragmentManager.setFragmentResultListener(SHOULD_OPEN,this) { result, data ->
+            val house = data.getHouse(HOUSE)
+            showBottomView(house.photos,house.address)
+        }
+        /*if (viewModel.getHouseResult.value is SuccessGetHouseResult) {
+            val house = (viewModel.getHouseResult.value as SuccessGetHouseResult).house
+            val houseAddress = house.address
+            showBottomView(house.photos,houseAddress)
+        }*/
         binding.mapview.mapWindow.map.addCameraListener(cameraListener)
         viewModel.getPointResult.observe(viewLifecycleOwner, Observer {
             when (it) {
@@ -114,6 +105,7 @@ class MapFragment : Fragment() {
                     val myLogo = getDrawable(requireContext(), R.drawable.home_vector_solid)?.toBitmap()
                     resultArrayList.forEach {housePoint ->
                         val listener = MapObjectTapListener { p0, p1 ->
+                            Log.d(TAG, "placemark clicked")
                             viewModel.getHouse(housePoint.houseId)
                             true
                         }
@@ -137,11 +129,13 @@ class MapFragment : Fragment() {
                 is SuccessGetHouseResult -> {
                     house = it.house
                     houseId = it.houseId
+                    hideBottomView()
                     showBottomView(it.house.photos,it.house.address)
                 }
             }
         }
     }
+
 
     override fun onStart() {
         super.onStart()
@@ -158,13 +152,6 @@ class MapFragment : Fragment() {
         MapKitFactory.getInstance().onStop()
         binding.mapview.onStop()
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putFloat(ZOOM,zoom)
-        outState.putSerializable(TARGET,LatLon(startLocation.latitude,startLocation.longitude))
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -194,15 +181,28 @@ class MapFragment : Fragment() {
             animate.duration = 150
             startAnimation(animate)
         }
+        binding.recyclerviewBottom.currentItem = 0
         recyclerViewAdapter.list = arrayListOf()
         binding.textViewBottomAddress.text = ""
         isShown = false
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (!isShown) {
+            viewModel.resetHouseResult()
+        }
+    }
+
+    private fun Bundle.getHouse(key : String) : House {
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) this.getSerializable(key) as House
+        else this.getSerializable(key,House::class.java) as House
+    }
 
     companion object {
-        const val ZOOM = "ZOOM"
-        const val TARGET = "TARGET"
+        const val HOUSE = "HOUSE"
+        const val SHOULD_OPEN = "SHOULD_OPEN"
     }
+
 
 }

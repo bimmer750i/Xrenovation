@@ -46,6 +46,9 @@ class StartFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        if (viewModel.isFirstStart(requireContext())) {
+            findNavController().navigate(R.id.action_startFragment_to_welcomeFragment)
+        }
         viewModel.refreshTokenResult.observe(viewLifecycleOwner) {
             when(it) {
                 is SuccessRefreshTokenResult -> {

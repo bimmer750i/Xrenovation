@@ -60,4 +60,10 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
         }
     }
 
+    fun resetModel() {
+        _getAccountInfoResult.postValue(GetAccountInfoResult())
+        _refreshTokenResult.postValue(RefreshTokenResult())
+        _addHouseCorrectionResult.postValue(AddHouseCorrectionResult())
+    }
+
 }

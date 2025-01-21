@@ -21,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import broz.tito.xrenovation.R
+import broz.tito.xrenovation.data.add_house.HouseModel
 import broz.tito.xrenovation.data.add_house.entities.*
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.AlertDialogAddUrlBinding
@@ -34,7 +35,6 @@ import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.AddHouseViewModel
 import broz.tito.xrenovation.presentation.models.AddHouseViewModelFactory
-import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.yandex.mapkit.geometry.Point
 import java.io.File
@@ -125,6 +125,10 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         val itemTouchHelperCallback = PhotoItemTouchHelperCallback()
         val photoItemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         photoItemTouchHelper.attachToRecyclerView(binding.recyclerviewChosenPhoto)
+        binding.editTextDescription.setOnTouchListener { view, motionEvent ->
+            binding.editTextDescription.parent.requestDisallowInterceptTouchEvent(true)
+            return@setOnTouchListener false
+        }
         return binding.root
     }
 
@@ -216,6 +220,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     }
                 }
                 is FailureGetAccountInfoResult -> {
+                    viewModel.resetState()
                     when (it.errorMessage) {
                         "INVALID_ID_TOKEN" -> {
                             viewModel.refreshToken(requireContext())
@@ -249,9 +254,10 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureRefreshTokenResult -> {
                     enableViews()
                     hideProgressBar()
+                    viewModel.resetState()
                     when(it.errorMessage) {
                         "TOKEN_EXPIRED" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         "USER_DISABLED" -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -260,7 +266,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         "MISSING_REFRESH_TOKEN" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -290,6 +296,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     }
                 }
                 is FailureSearchPointResult -> {
+                    viewModel.resetState()
                     enableViews()
                     hideProgressBar()
                     showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -315,9 +322,15 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     Log.d(TAG, "successLoadPhotosResult: ${it.urlList}")
                 }
                 is FailureLoadPhotosResult -> {
+                    viewModel.resetState()
                     enableViews()
                     hideProgressBar()
-                    showSnackBarShort(this,binding.root,getString(R.string.failed_to_upload_photos))
+                    if (it.errorMessage == HouseModel.POST_TIMEOUT) {
+                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout_house))
+                    }
+                    else {
+                        showSnackBarShort(this,binding.root,getString(R.string.failed_to_upload_photos))
+                    }
                 }
 
             }
@@ -333,6 +346,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     }
                 }
                 is FailureAddHouseResult -> {
+                    viewModel.resetState()
                     enableViews()
                     hideProgressBar()
                     showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
@@ -351,9 +365,10 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     hideProgressBar()
                 }
                 is FailureAddHousePointResult -> {
+                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                    viewModel.resetState()
                     enableViews()
                     hideProgressBar()
-                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                 }
             }
         }
@@ -394,7 +409,6 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             editTextConstructionYear.isEnabled = true
             editTextNumberOfFloors.isEnabled = true
             editTextDescription.isEnabled = true
-            buttonAddHouse.isEnabled = true
             recyclerviewChosenPhoto.visibility = View.VISIBLE
         }
     }
@@ -405,7 +419,6 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             editTextConstructionYear.isEnabled = false
             editTextNumberOfFloors.isEnabled = false
             editTextDescription.isEnabled = false
-            buttonAddHouse.isEnabled = false
             recyclerviewChosenPhoto.visibility = View.GONE
         }
     }

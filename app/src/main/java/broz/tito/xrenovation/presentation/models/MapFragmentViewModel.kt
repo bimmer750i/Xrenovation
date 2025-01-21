@@ -40,8 +40,15 @@ class MapFragmentViewModel @Inject constructor(val getPointsUseCase: GetPointsUs
         }
     }
 
-    fun resetGetHouseResult() {
+    fun resetMapFragmentViewModel() {
+        _getHouseResult.postValue(GetHouseResult())
+        _getPointsResult.postValue(GetPointResult())
+    }
+
+    fun resetHouseResult() {
         _getHouseResult.postValue(GetHouseResult())
     }
+
+
 
 }

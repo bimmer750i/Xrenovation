@@ -10,12 +10,6 @@ import broz.tito.xrenovation.data.get_houses.entities.FailureGetPointResult
 import broz.tito.xrenovation.data.get_houses.entities.GetPointResult
 import broz.tito.xrenovation.data.get_houses.entities.PendingGetPointResult
 import broz.tito.xrenovation.data.get_houses.entities.RawSuccessGetPointResult
-import broz.tito.xrenovation.presentation.entities.DisplayComment
-import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
-import com.google.firebase.app
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
 import com.google.firebase.storage.StorageReference
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
@@ -32,7 +26,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
-import org.json.JSONObject
 import java.io.File
 import java.util.Collections
 import javax.inject.Inject
@@ -118,7 +111,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         emit(result)
         val lastTimePosted = getLastTimePosted(localId)
         val now = getTime() ?: TimeHelper.getUtcTime()
-        if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < MILLISECONDS_DAY)) {
+        if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
             result = FailureLoadPhotosResult("POST_TIMEOUT")
             Log.d(TAG, "loadPhotosToFireBase -- failure: POST_TIMEOUT")
         }
@@ -181,7 +174,14 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
     fun addHouse(localId: String, name : String, body : House, accessToken : String) : Flow<AddHouseResult> = flow {
         var result : AddHouseResult = PendingAddHouseResult()
         emit(result)
-        try {
+        val lastTimePosted = getLastTimePosted(localId)
+        val now = getTime() ?: TimeHelper.getUtcTime()
+        if (lastTimePosted?.lastTimePosted != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
+            result = FailureAddHouseResult(POST_TIMEOUT)
+            Log.d(TAG, "addHouse -- failure: POST_TIMEOUT")
+        }
+        else if (lastTimePosted?.lastTimePosted != null && now != null)  {
+            try {
                 val response = houseService.addHouse(body,accessToken)
                 Log.d(TAG, "addHouse: ${response.raw()}")
                 if (!response.isSuccessful) {
@@ -192,6 +192,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                     response.body()?.let {
                         result = SuccessAddHouseResult(it)
                         Log.d(TAG, "addHouse -- success: ${it}")
+                        addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
                     }
                 }
             }
@@ -199,6 +200,11 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 result = FailureAddHouseResult(e.message.toString())
                 Log.d(TAG, "addHouse -- failure -- ${e.message.toString()}")
             }
+        }
+        else {
+            result = FailureAddHouseResult(POST_TIMEOUT)
+            Log.d(TAG, "addHouse -- failure: POST_TIMEOUT")
+        }
         emit(result)
     }.flowOn(Dispatchers.IO)
 
@@ -279,7 +285,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         val lastTimePosted = getLastTimePosted(localId)
         val now = getTime() ?: TimeHelper.getUtcTime()
         Log.d(TAG, "addComment -- lastTimePosted: ${lastTimePosted?.lastTimePosted}")
-        if (lastTimePosted?.lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < MILLISECONDS_DAY)) {
+        if (lastTimePosted?.lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
             result = FailureAddCommentResult("POST_TIMEOUT")
             Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
@@ -348,7 +354,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         emit(result)
         val lastTimePosted = getLastTimePosted(localId)
         val now = getTime() ?: TimeHelper.getUtcTime()
-        if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < MILLISECONDS_DAY)) {
+        if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
                 result = FailureAddHouseCorrectionResult("POST_TIMEOUT")
                 Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
         }
@@ -465,7 +471,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
 
 
     companion object {
-        private const val MILLISECONDS_DAY : Long = 86_400_000
+        private const val POST_DELAY_INTERVAL : Long = 10_000
+        const val POST_TIMEOUT : String = "POST_TIMEOUT"
     }
 
 

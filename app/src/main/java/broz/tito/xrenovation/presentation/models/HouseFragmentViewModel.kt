@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import broz.tito.xrenovation.data.add_house.entities.AddCommentResult
 import broz.tito.xrenovation.data.add_house.entities.AddHouseCorrectionResult
 import broz.tito.xrenovation.data.add_house.entities.Comment
+import broz.tito.xrenovation.data.add_house.entities.FailureAddCommentResult
 import broz.tito.xrenovation.data.add_house.entities.GetCommentsResult
+import broz.tito.xrenovation.data.add_house.entities.SuccessAddCommentResult
 import broz.tito.xrenovation.data.auth.entities.GetAccountInfoResult
 import broz.tito.xrenovation.data.auth.entities.RefreshTokenResult
 import broz.tito.xrenovation.data.auth.entities.SuccessGetAccountInfoResult
@@ -72,6 +74,12 @@ class HouseFragmentViewModel @Inject constructor(val addCommentUseCase: AddComme
             getCommentsUseCase(houseId).onEach {
                 _getCommentsResult.postValue(it)
             }.collect()
+        }
+    }
+
+    fun resetCommentState() {
+        if (_addCommentResult.value is FailureAddCommentResult || _addCommentResult.value is SuccessAddCommentResult ) {
+            _addCommentResult.postValue(AddCommentResult())
         }
     }
 

@@ -20,5 +20,7 @@ class House(
     @SerializedName("links")
     val links : ArrayList<String>
 ) : java.io.Serializable {
+    @SerializedName("localid")
+    var localid : String = ""
     constructor() : this(LatLon(0.0,0.0),"","","","","", arrayListOf(), arrayListOf())
 }

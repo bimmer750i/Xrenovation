@@ -9,18 +9,21 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
 import broz.tito.xrenovation.R
+import broz.tito.xrenovation.data.add_house.POST_TIMEOUT
 import broz.tito.xrenovation.data.add_house.entities.FailureAddHouseCorrectionResult
 import broz.tito.xrenovation.data.add_house.entities.HouseCorrection
 import broz.tito.xrenovation.data.add_house.entities.PendingAddHouseCorrectionResult
 import broz.tito.xrenovation.data.add_house.entities.SuccessAddHouseCorrectionResult
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentHouseCorrectionBinding
+import broz.tito.xrenovation.presentation.interfaces.Disablable
+import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.HouseCorrectionFragmentViewModel
 import broz.tito.xrenovation.presentation.models.HouseCorrectionFragmentViewModelFactory
 import javax.inject.Inject
 
-class HouseCorrectionFragment : Fragment(),SnackBarAble {
+class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablable {
 
     private val args : HouseCorrectionFragmentArgs? by navArgs()
 
@@ -59,31 +62,43 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingGetAccountInfoResult -> {
-                    // TODO SHOW LOADING
+                    showProgressBar()
+                    disableViews()
                 }
                 is SuccessGetAccountInfoResult -> {
                     it.user.emailVerified?.let {verified ->
-                        if (verified) {
-                            viewModel.addHouseCorrection(requireContext(),HouseCorrection(0,houseId!!,it.user.localId!!,binding.editTextHouseCorrection.text.toString()))
+                        if (verified && it.user.localId != null) {
+                            viewModel.addHouseCorrection(requireContext(),HouseCorrection(0,houseId ?: "",it.user.localId,binding.editTextHouseCorrection.text.toString()))
                         }
                         else {
                             showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
+                            hideProgressBar()
+                            enableViews()
+                            viewModel.resetModel()
                         }
                     }
                 }
                 is FailureGetAccountInfoResult -> {
                     when (it.errorMessage) {
-                        "INVALID_ID_TOKEN" -> {
+                        INVALID_ID_TOKEN -> {
                             viewModel.refreshToken(requireContext())
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
+                            hideProgressBar()
+                            enableViews()
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.error_try_again))
+                            hideProgressBar()
+                            enableViews()
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            hideProgressBar()
+                            enableViews()
                         }
                     }
                     viewModel.resetModel()
@@ -97,19 +112,29 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
                 }
                 is FailureRefreshTokenResult -> {
                     when(it.errorMessage) {
-                        "TOKEN_EXPIRED" -> {
+                        TOKEN_EXPIRED -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(this,binding.root,getString(R.string.token_expired_error))
+                        }
+                        USER_DISABLED -> {
+                            hideProgressBar()
+                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
-                        "USER_DISABLED" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                        USER_NOT_FOUND -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
                         }
-                        "USER_NOT_FOUND" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                        }
-                        "MISSING_REFRESH_TOKEN" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                        MISSING_REFRESH_TOKEN -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         else -> {
+                            hideProgressBar()
+                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                     }
@@ -119,21 +144,21 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
         }
         viewModel.addHouseCorrectionResult.observe(viewLifecycleOwner, Observer {
             when (it) {
-                is PendingAddHouseCorrectionResult -> {
-                    binding.buttonSendCorrection.isIndeterminateProgressMode = true
-                    binding.buttonSendCorrection.progress = 66
-                }
                 is SuccessAddHouseCorrectionResult -> {
-                    binding.buttonSendCorrection.progress = 0
+                    hideProgressBar()
+                    enableViews()
                     showSnackBarLong(this,binding.root,getString(R.string.correction_added))
                     viewModel.resetModel()
                 }
                 is FailureAddHouseCorrectionResult -> {
-                    binding.buttonSendCorrection.progress = 0
-                    if (it.errorMessage == "POST_TIMEOUT") {
+                    if (it.errorMessage == POST_TIMEOUT) {
+                        hideProgressBar()
+                        enableViews()
                         showSnackBarShort(this,binding.root,getString(R.string.post_timeout_correction))
                     }
                     else {
+                        hideProgressBar()
+                        enableViews()
                         showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                     }
                     viewModel.resetModel()
@@ -142,4 +167,23 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble {
         })
     }
 
+    override fun showProgressBar() {
+        if (!binding.buttonSendCorrection.isIndeterminateProgressMode) {
+            binding.buttonSendCorrection.isIndeterminateProgressMode = true
+            binding.buttonSendCorrection.progress = 66
+        }
+    }
+
+    override fun hideProgressBar() {
+        binding.buttonSendCorrection.progress = 0
+        binding.buttonSendCorrection.isIndeterminateProgressMode = false
+    }
+
+    override fun enableViews() {
+        binding.editTextHouseCorrection.isEnabled = true
+    }
+
+    override fun disableViews() {
+        binding.editTextHouseCorrection.isEnabled = false
+    }
 }

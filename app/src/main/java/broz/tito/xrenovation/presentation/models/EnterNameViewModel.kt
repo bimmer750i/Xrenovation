@@ -62,5 +62,10 @@ class EnterNameViewModel @Inject constructor(val setAccountInfoUseCase: SetAccou
         }
     }
 
+    fun resetState() {
+        _refreshTokenResult.postValue(RefreshTokenResult())
+        _setAccountInfoResult.postValue(SetAccountInfoResult())
+    }
+
 
 }

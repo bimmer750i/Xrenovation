@@ -18,6 +18,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import broz.tito.xrenovation.R
+import broz.tito.xrenovation.data.add_house.POST_TIMEOUT
 import broz.tito.xrenovation.data.add_house.entities.*
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentHouseBinding
@@ -43,7 +44,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
 
     private lateinit var commentsAdapter : CommentsRecyclerViewAdapter
 
-    private var houseId : String? = null
+    private lateinit var houseId : String
 
     @Inject
     lateinit var houseFragmentViewModelFactory: HouseFragmentViewModelFactory
@@ -54,7 +55,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         super.onCreate(savedInstanceState)
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,houseFragmentViewModelFactory)[HouseFragmentViewModel::class.java]
-        adapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.DISPLAY_PHOTO_VIEWHOLDER,{})
+        adapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.DISPLAY_PHOTO_VIEWHOLDER) {}
         commentsAdapter = CommentsRecyclerViewAdapter()
     }
 
@@ -67,23 +68,28 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         binding.recyclerviewHousePhoto.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.recyclerviewComments.adapter = commentsAdapter
         binding.recyclerviewComments.layoutManager = LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false)
-        args.let {
-            binding.textViewHouseAddress.text = it.house.address
-            binding.textviewConstructionYearYear.text = it.house.year
-            binding.textViewNumberOfFlatsNumber.text = it.house.flats
-            binding.textViewNumberOfFloorsNumber.text = it.house.floors
-            binding.textViewDescriptionText.text = it.house.description
-            if (it.house.links.size == 0) {
-                binding.textViewLinks.visibility = View.GONE
-            }
-            else {
-                it.house.links.forEach {
-                    addChip(it)
+        args.let { houseArgs ->
+            houseArgs.house?.let { house ->
+                house.let {
+                    binding.textViewHouseAddress.text = it.address
+                    binding.textviewConstructionYearYear.text = it.year
+                    binding.textViewNumberOfFlatsNumber.text = it.flats
+                    binding.textViewNumberOfFloorsNumber.text = it.floors
+                    binding.textViewDescriptionText.text = it.description
+                    if (it.links.size == 0) {
+                        binding.textViewLinks.visibility = View.GONE
+                    }
+                    else {
+                        it.links.forEach {
+                            addChip(it)
+                        }
+                    }
+                    adapter.list = it.photos
+                    parentFragmentManager.setFragmentResult(MapFragment.SHOULD_OPEN,Bundle().putHouse(house))
                 }
             }
-            adapter.list = it.house.photos
-            houseId = it.houseId
-            parentFragmentManager.setFragmentResult(MapFragment.SHOULD_OPEN,Bundle().putHouse(it.house))
+            houseId = houseArgs.houseId
+
         }
         return binding.root
     }
@@ -110,7 +116,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             val popupMenu = PopupMenu(requireContext(),binding.imageViewSuggestHouseCorrection)
             popupMenu.menuInflater.inflate(R.menu.house_fragment_menu,popupMenu.menu)
             popupMenu.setOnMenuItemClickListener {
-                    val directions = HouseFragmentDirections.actionHouseFragmentToHouseCorrectionFragment(houseId!!)
+                    val directions = HouseFragmentDirections.actionHouseFragmentToHouseCorrectionFragment(houseId)
                 viewModel.resetCommentState()
                     findNavController().navigate(directions)
                 true }
@@ -124,35 +130,40 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                 is SuccessGetAccountInfoResult -> {
                     it.user.emailVerified?.let {verified ->
                         if (verified && binding.editTextComment.checkCommentLength()) {
-                            viewModel.addComment(requireContext(),houseId!!,binding.editTextComment.text.toString(),it.user.displayName,it.user.localId,it.user.photoUrl)
+                            viewModel.addComment(requireContext(),houseId,binding.editTextComment.text.toString(),it.user.displayName,it.user.localId,it.user.photoUrl)
                         }
                         else if (!binding.editTextComment.checkCommentLength()) {
                             enableViews()
+                            viewModel.resetState()
                         }
                         else {
                             enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
+                            viewModel.resetState()
                         }
                     }
                 }
                 is FailureGetAccountInfoResult -> {
                     when (it.errorMessage) {
-                        "INVALID_ID_TOKEN" -> {
+                        INVALID_ID_TOKEN -> {
                             viewModel.refreshToken(requireContext())
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
                             enableViews()
+                            viewModel.resetState()
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                             enableViews()
+                            viewModel.resetState()
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                             enableViews()
+                            viewModel.resetState()
                         }
                     }
                 }
@@ -166,22 +177,23 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                 is FailureRefreshTokenResult -> {
                     enableViews()
                     when(it.errorMessage) {
-                        "TOKEN_EXPIRED" -> {
+                        TOKEN_EXPIRED -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.token_expired_error))
+                        }
+                        USER_DISABLED -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
                         }
-                        "USER_DISABLED" -> {
+                        USER_NOT_FOUND -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
                         }
-                        "USER_NOT_FOUND" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                        }
-                        "MISSING_REFRESH_TOKEN" -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_logged_in))
+                        MISSING_REFRESH_TOKEN -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                     }
+                    viewModel.resetState()
                 }
             }
         }
@@ -201,11 +213,25 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                 is FailureAddCommentResult -> {
                     enableViews()
                     binding.buttonComment.progress = 0
-                    if (it.errorMessage == "POST_TIMEOUT") {
-                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout_comment))
-                    }
-                    else {
-                        showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
+                    when(it.errorMessage) {
+                        POST_TIMEOUT -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.post_timeout_comment))
+                        }
+                        TOKEN_EXPIRED -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
+                        }
+                        USER_DISABLED -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                        }
+                        USER_NOT_FOUND -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                        }
+                        MISSING_REFRESH_TOKEN -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
+                        }
+                        else -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
+                        }
                     }
                     viewModel.resetState()
                 }
@@ -234,7 +260,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
 
     override fun onStart() {
         super.onStart()
-        viewModel.getComments(houseId!!)
+        viewModel.getComments(houseId)
     }
 
 
@@ -272,14 +298,6 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             return true
         }
     }
-
-    /*private fun showBottomNavigationView() {
-        (childFragmentManager.findFragmentById(R.id.mainFragment) as MainFragment).showBottomNavigationView()
-    }
-
-    private fun hideBottomNavigationView() {
-        (childFragmentManager.findFragmentById(R.id.mainFragment) as MainFragment).hideBottomNavigationView()
-    }*/
 
     fun Bundle.putHouse(house: House) : Bundle {
         this.putSerializable(MapFragment.HOUSE,house)

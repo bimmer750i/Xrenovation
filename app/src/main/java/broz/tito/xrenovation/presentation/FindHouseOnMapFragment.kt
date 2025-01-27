@@ -80,8 +80,8 @@ class FindHouseOnMapFragment : Fragment() {
         }
         binding.buttonReady.setOnClickListener {
             if ((searchPointAddress != null && housePoint != null)) {
-                if (searchPointAddress!!.isMoscow(requireContext())) {
-                    parentFragmentManager.setFragmentResult(MAP_RESULT, bundleOf(LATITUDE to housePoint!!.latitude, LONGITUDE to housePoint!!.longitude,
+                if (searchPointAddress?.isMoscow(requireContext()) == true ) {
+                    parentFragmentManager.setFragmentResult(MAP_RESULT, bundleOf(LATITUDE to (housePoint?.latitude ?: 0), LONGITUDE to (housePoint?.longitude ?: 0),
                         ADDRESS to searchPointAddress ))
                 }
                 findNavController().navigateUp()
@@ -121,7 +121,7 @@ class FindHouseOnMapFragment : Fragment() {
         binding.findHouseMapview.mapWindow.map
             .addCameraListener(cameraListener)
         if (args.latLon != null) {
-            binding.findHouseMapview.mapWindow.map.move(CameraPosition(housePoint!!,16.5F,0F,0F))
+            binding.findHouseMapview.mapWindow.map.move(CameraPosition(housePoint ?: startLocation,16.5F,0F,0F))
         }
         binding.findHouseMapview.onStart()
 

@@ -22,16 +22,16 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
                                                            val refreshTokenUseCase: RefreshTokenUseCase,
                                                            val saveAuthResponseUseCase: SaveAuthResponseUseCase,
                                                            val usecase : AddHouseCorrectionUseCase,
-                                                           val sharedPrefsModel: SharedPrefsModel) : ViewModel(){
+                                                           val sharedPrefsModel: SharedPrefsModel) : ViewModel() {
 
     private val _getAccountInfoResult = MutableLiveData<GetAccountInfoResult>()
-    val getAccountInfoResult : LiveData<GetAccountInfoResult> = _getAccountInfoResult
+    val getAccountInfoResult: LiveData<GetAccountInfoResult> = _getAccountInfoResult
 
     private val _refreshTokenResult = MutableLiveData<RefreshTokenResult>()
-    val refreshTokenResult : LiveData<RefreshTokenResult> = _refreshTokenResult
+    val refreshTokenResult: LiveData<RefreshTokenResult> = _refreshTokenResult
 
     private val _addHouseCorrectionResult = MutableLiveData<AddHouseCorrectionResult>()
-    val addHouseCorrectionResult : LiveData<AddHouseCorrectionResult> = _addHouseCorrectionResult
+    val addHouseCorrectionResult: LiveData<AddHouseCorrectionResult> = _addHouseCorrectionResult
 
     fun getAccountInfo(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -45,7 +45,13 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
         viewModelScope.launch(Dispatchers.IO) {
             refreshTokenUseCase(sharedPrefsModel.getRefreshToken(context)).onEach {
                 if (it is SuccessRefreshTokenResult) {
-                    saveAuthResponseUseCase(context,it.response.idToken,null,it.response.refreshToken,null)
+                    saveAuthResponseUseCase(
+                        context,
+                        it.response.idToken,
+                        null,
+                        it.response.refreshToken,
+                        null
+                    )
                 }
                 _refreshTokenResult.postValue(it)
             }.collect()
@@ -53,17 +59,21 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
     }
 
     fun addHouseCorrection(context: Context, houseCorrection: HouseCorrection) {
-        viewModelScope.launch {
-            usecase(sharedPrefsModel.getLocalId(context),houseCorrection,sharedPrefsModel.getIdToken(context)).onEach {
+        viewModelScope.launch(Dispatchers.IO) {
+            usecase(
+                houseCorrection.localId,
+                houseCorrection,
+                sharedPrefsModel.getIdToken(context)
+            ).onEach {
                 _addHouseCorrectionResult.postValue(it)
             }.collect()
         }
     }
 
-    fun resetModel() {
-        _getAccountInfoResult.postValue(GetAccountInfoResult())
-        _refreshTokenResult.postValue(RefreshTokenResult())
-        _addHouseCorrectionResult.postValue(AddHouseCorrectionResult())
-    }
+        fun resetModel() {
+            _getAccountInfoResult.postValue(GetAccountInfoResult())
+            _refreshTokenResult.postValue(RefreshTokenResult())
+            _addHouseCorrectionResult.postValue(AddHouseCorrectionResult())
+        }
 
 }

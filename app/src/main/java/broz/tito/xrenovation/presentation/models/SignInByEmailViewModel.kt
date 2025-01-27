@@ -25,12 +25,16 @@ class SignInByEmailViewModel @Inject constructor(val useCase: SignInByEmailUseCa
     fun signInByEmail(context : Context, email : String, password : String) {
         viewModelScope.launch(Dispatchers.IO) {
             useCase(email, password).onEach {
-                if (it is SuccessSignInByEmailResult && it.response.registered) {
+                if (it is SuccessSignInByEmailResult && it.response.registered == true) {
                     saveResponseUseCase(context,it.response.idToken,it.response.email,it.response.refreshToken,it.response.localId)
                 }
                 _signInResult.postValue(it)
             }.collect()
         }
+    }
+
+    fun resetState() {
+        _signInResult.postValue(SignInByEmailResult())
     }
 
 

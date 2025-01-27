@@ -41,9 +41,9 @@ class MapFragment : Fragment() {
 
     private var isShown = false
 
-    var house : House? = null
+    private var house : House = House()
 
-    private var houseId : String? = null
+    private var houseId : String = ""
 
     private lateinit var binding: FragmentMapBinding
 
@@ -73,8 +73,8 @@ class MapFragment : Fragment() {
         viewModel = ViewModelProvider(this,mapFragmentViewModelFactory)[MapFragmentViewModel::class.java]
         MapKitFactory.initialize(activity)
         recyclerViewAdapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.DISPLAY_PHOTO_VIEWHOLDER) {
-            if (house != null) {
-                val directions = MapFragmentDirections.actionMapFragment2ToHouseFragment2(house!!,houseId!!)
+            if (!house.isEmpty()) {
+                val directions = MapFragmentDirections.actionMapFragment2ToHouseFragment2(house,houseId)
                 findNavController().navigate(directions)
             }
         }
@@ -194,15 +194,17 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun Bundle.getHouse(key : String) : House {
-        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) this.getSerializable(key) as House
-        else this.getSerializable(key,House::class.java) as House
-    }
-
     companion object {
         const val HOUSE = "HOUSE"
         const val SHOULD_OPEN = "SHOULD_OPEN"
     }
 
-
 }
+
+fun Bundle.getHouse(key : String) : House {
+    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) this.getSerializable(key) as House
+    else this.getSerializable(key,House::class.java) as House
+}
+
+
+

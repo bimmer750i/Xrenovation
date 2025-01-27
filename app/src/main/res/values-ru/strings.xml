@@ -14,7 +14,7 @@
     <string name="sign_up_error_email_exists">Этот Email уже зарегистрирован</string>
     <string name="sign_up_error_many_attempts">Слишком много попыток, попробуйте позже</string>
     <string name="verification_email_sent">Отправлен Email для подтверждения</string>
-    <string name="incorrect_email">Неправильный Email</string>
+    <string name="incorrect_email">Неправильный формат Email</string>
     <string name="different_passwords">Пароли не совпадают</string>
     <string name="weak_password">Минимальная длина пароля - 6 символов</string>
     <string name="sign_up_exception">Ошибка регистрации, попробуйте позднее</string>
@@ -32,6 +32,8 @@
     <string name="email_not_verified">Email не подтверждён</string>
     <string name="get_account_info_error">Ошибка, попробуйте позже :(</string>
     <string name="missing_refresh_token_error">Войдите в аккаунт или зарегистрируйтесь</string>
+    <string name="token_expired_error">Войдите в аккаунт</string>
+    <string name="user_not_found_error">Пользователь не найден</string>
     <string name="log_out">Выйти</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>

@@ -8,14 +8,42 @@
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-assumenosideeffects class android.util.Log {
+public static boolean isLoggable(java.lang.String, int);
+public static int d(...);
+public static int w(...);
+public static int v(...);
+public static int i(...);
+public static int e(...);
+}
+-ignorewarnings
+-keep class * {
+public private *;
+}
+-whyareyoukeeping class android.util.Log
+
+-keepclassmembers class broz.tito.xrenovation.presentation.WebJsInterface {
+   public *;
+}
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepattributes RuntimeVisibleAnnotations
+-keep class * extends androidx.navigation.Navigator
+-keep class broz.tito.xrenovation.data.add_house.entities.** {*;}
+-keep class * implements java.io.Serializable
+-keep class * implements java.io.Serializable {
+       static final long serialVersionUID;
+       private static final java.io.ObjectStreamField[] serialPersistentFields;
+       !static !transient <fields>;
+       private void writeObject(java.io.ObjectOutputStream);
+       private void readObject(java.io.ObjectInputStream);
+       java.lang.Object writeReplace();
+       java.lang.Object readResolve();
+}

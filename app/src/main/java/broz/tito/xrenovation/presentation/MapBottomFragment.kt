@@ -12,6 +12,7 @@ import broz.tito.xrenovation.data.add_house.entities.House
 import broz.tito.xrenovation.databinding.FragmentMapBottomBinding
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import broz.tito.xrenovation.presentation.MapFragment
 
 class MapBottomFragment : BottomSheetDialogFragment() {
 
@@ -29,7 +30,7 @@ class MapBottomFragment : BottomSheetDialogFragment() {
         super.onCreate(savedInstanceState)
         recyclerViewAdapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.DISPLAY_PHOTO_VIEWHOLDER) {
             if (house != null) {
-                val directions = MapFragmentDirections.actionMapFragment2ToHouseFragment2(house!!,houseId!!)
+                val directions = MapFragmentDirections.actionMapFragment2ToHouseFragment2(house,houseId ?: "")
                 findNavController().navigate(directions)
             }
             this.dismiss()
@@ -52,7 +53,7 @@ class MapBottomFragment : BottomSheetDialogFragment() {
         if (arguments != null) {
             recyclerViewAdapter.list = arguments?.getStringArrayList(PHOTO_LIST) as ArrayList<String>
             binding.textViewBottomHouseAddress.text = arguments?.getString(ADDRESS)
-            house = arguments?.getSerializable(HOUSE) as House
+            house = arguments?.getHouse(HOUSE)
             houseId = arguments?.getString("ID")
         }
     }

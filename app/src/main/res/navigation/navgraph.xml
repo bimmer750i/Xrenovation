@@ -33,7 +33,7 @@
         <action
             android:id="@+id/action_welcomeFragment_to_mainFragment"
             app:destination="@id/mainFragment"
-            app:popUpTo="@id/welcomeFragment"
+            app:popUpTo="@id/startFragment"
             app:popUpToInclusive="true" />
     </fragment>
 </navigation>

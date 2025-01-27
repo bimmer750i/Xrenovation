@@ -19,6 +19,8 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import javax.inject.Inject
 
+const val AUTH_ERROR = "AUTH_ERROR"
+
 class AuthModel @Inject constructor(val service: AuthService, val captchaService: CaptchaService, val tokenService: TokenService, val storageReference : StorageReference) {
 
     val TAG = "AuthModel"
@@ -31,7 +33,7 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()!!.string()
                 val error = Gson().fromJson(errorBody, FullFireBaseSignUpError::class.java)
-                result = FailureSignUpByEmailResult(error.error.message).also {
+                result = FailureSignUpByEmailResult(error.error.message ?: AUTH_ERROR).also {
                     Log.d(TAG,it.javaClass.simpleName + " -- " + it.errorMessage)
                 }
 
@@ -81,7 +83,7 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()!!.string()
                 val error = Gson().fromJson(errorBody, FullFireBaseSignUpError::class.java)
-                result = FailureVerifyEmailResult(error.error.message).also {
+                result = FailureVerifyEmailResult(error.error.message ?: AUTH_ERROR).also {
                     Log.d(TAG,it.javaClass.simpleName + " -- " + it.errorMessage)
                 }
             }
@@ -105,13 +107,13 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             if (!response.isSuccessful) {
                 val errorBody = response.errorBody()!!.string()
                 val error = Gson().fromJson(errorBody,FullFireBaseSignUpError::class.java)
-                result = FailureSignInByEmailResult(error.error.message)
+                result = FailureSignInByEmailResult(error.error.message ?: AUTH_ERROR)
                 Log.d(TAG, "signInByEmail -- error -- ${error.error.message}")
             }
             else {
                 response.body()?.let {
-                    result = SuccessSignInByEmailResult(it)
                     Log.d(TAG, "signInByEmail -- success")
+                    result = SuccessSignInByEmailResult(it)
                 }
 
             }
@@ -130,13 +132,13 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             val response = service.setAccountInfo(body)
             if (!response.isSuccessful) {
                 val error = Gson().fromJson(response.errorBody()?.string(),FullFireBaseSignUpError::class.java)
-                result = FailureSetAccountInfoResult(error.error.message)
+                result = FailureSetAccountInfoResult(error.error.message ?: AUTH_ERROR)
                 Log.d(TAG, "setAccountInfo -- failure -- ${error.error.message}")
             }
             else {
                 response.body()?.let {
-                    result = SuccessSetAccountInfoResult(it)
                     Log.d(TAG, "setAccountInfo -- success -- photo: ${it.photoUrl}")
+                    result = SuccessSetAccountInfoResult(it)
                 }
             }
         }
@@ -154,14 +156,14 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             val response = service.getAccountInfo(body)
             if (!response.isSuccessful) {
                 val error = Gson().fromJson(response.errorBody()?.string(),FullFireBaseSignUpError::class.java)
-                result = FailureGetAccountInfoResult(error.error.message)
-                Log.d(TAG, "getAccountInfo -- error -- ${error.error.message}")
+                result = FailureGetAccountInfoResult(error.error.message ?: AUTH_ERROR)
+                Log.d(TAG, "getAccountInfo -- error -- ${error.error.message ?: AUTH_ERROR}")
             }
             else {
                 response.body()?.let {
-                    if (it.users.size > 0) {
-                        result = SuccessGetAccountInfoResult(it.users.get(0))
+                    if (it.users != null && it.users.size > 0) {
                         Log.d(TAG, "getAccountInfo -- user0 -- ${it.users.get(0).email} -- photo ${it.users.get(0).photoUrl}")
+                        result = SuccessGetAccountInfoResult(it.users.get(0))
                     }
                 }
             }
@@ -180,13 +182,13 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             val response = tokenService.refreshToken(body)
             if (!response.isSuccessful) {
                 val error = Gson().fromJson(response.errorBody()?.string(),FullFireBaseSignUpError::class.java)
-                result = FailureRefreshTokenResult(error.error.message)
-                Log.d(TAG, "refreshToken -- error -- ${error.error.message}")
+                result = FailureRefreshTokenResult(error.error.message ?: AUTH_ERROR)
+                Log.d(TAG, "refreshToken -- error -- ${error.error.message ?: AUTH_ERROR}")
             }
             else {
                 response.body()?.let {
-                    result = SuccessRefreshTokenResult(it)
                     Log.d(TAG, "refresh -- success -- ${it.idToken} -- ${it.refreshToken}")
+                    result = SuccessRefreshTokenResult(it)
                 }
             }
         }
@@ -219,16 +221,16 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
                 }
                 else {
                     it.task.result.error?.let {exception ->
+                        Log.d(TAG, "uploadProfilePicture -- failure ${exception.message.toString()}")
                         result = FailureUploadProfilePictureResult(exception.message.toString())
                         trySend(result)
-                        Log.d(TAG, "uploadProfilePicture -- failure ${exception.message.toString()}")
                     }
                 }
             }
                 .addOnFailureListener { exception ->
+                    Log.d(TAG, "uploadProfilePicture -- failure ${exception.message.toString()}")
                     result = FailureUploadProfilePictureResult(exception.message.toString())
                     trySend(result)
-                    Log.d(TAG, "uploadProfilePicture -- failure ${exception.message.toString()}")
                 }
         }
         catch (e : Exception) {
@@ -247,14 +249,14 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
             val response = service.sendPasswordResetEmail(body)
             if (!response.isSuccessful) {
                 val error = Gson().fromJson(response.errorBody()?.string(),FullFireBaseSignUpError::class.java)
-                result = FailureSendPasswordResetEmailResult(error.error.message)
-                Log.d(TAG, "sendPasswordResetEmail -- error -- ${error.error.message}")
+                result = FailureSendPasswordResetEmailResult(error.error.message ?: AUTH_ERROR)
+                Log.d(TAG, "sendPasswordResetEmail -- error -- ${error.error.message ?: AUTH_ERROR}")
             }
             else {
                 response.body()?.let {
                     it.email?.let {
-                        result = SuccessSendPasswordResetEmailResult(it)
                         Log.d(TAG, "sendPasswordResetEmail -- success -- $it")
+                        result = SuccessSendPasswordResetEmailResult(it)
                     }
                 }
             }

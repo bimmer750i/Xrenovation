@@ -76,12 +76,14 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                 }
 
                 is FailureSetAccountInfoResult -> {
-                    if (it.errorMessage == "INVALID_ID_TOKEN") {
+                    if (it.errorMessage == INVALID_ID_TOKEN) {
                         enterNameViewModel.refreshToken(requireContext())
-                    } else if (it.errorMessage == "USER_NOT_FOUND") {
+                    }
+                    else if (it.errorMessage == USER_NOT_FOUND) {
                         hideProgressBar()
                         enableViews()
                         findNavController().navigateUp()
+                        enterNameViewModel.resetState()
                     } else {
                         hideProgressBar()
                         enableViews()
@@ -90,16 +92,13 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                             binding.enterNameFragmentLayout,
                             getString(R.string.error_try_again)
                         )
+                        enterNameViewModel.resetState()
                     }
                 }
             }
         }
         enterNameViewModel.refreshTokenResult.observe(viewLifecycleOwner) {
             when (it) {
-                is PendingRefreshTokenResult -> {
-                    // Nothing to do here
-                }
-
                 is SuccessRefreshTokenResult -> {
                     enterNameViewModel.setAccountInfo(
                         requireContext(),
@@ -117,6 +116,7 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                         binding.enterNameFragmentLayout,
                         getString(R.string.error_try_again)
                     )
+                    enterNameViewModel.resetState()
                 }
             }
 

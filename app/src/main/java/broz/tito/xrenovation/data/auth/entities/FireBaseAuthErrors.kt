@@ -8,16 +8,16 @@ data class FullFireBaseSignUpError(
 
 data class FireBaseSignUpError (
 
-    @SerializedName("code"    ) var code    : Int,
-    @SerializedName("message" ) var message : String,
-    @SerializedName("errors"  ) var errors  : ArrayList<FireBaseAuthSubError> = arrayListOf()
+    @SerializedName("code"    ) var code    : Int?,
+    @SerializedName("message" ) var message : String?,
+    @SerializedName("errors"  ) var errors  : ArrayList<FireBaseAuthSubError>?
 
 )
 
 data class FireBaseAuthSubError (
 
-    @SerializedName("message" ) var message : String,
-    @SerializedName("domain"  ) var domain  : String,
-    @SerializedName("reason"  ) var reason  : String
+    @SerializedName("message" ) var message : String?,
+    @SerializedName("domain"  ) var domain  : String?,
+    @SerializedName("reason"  ) var reason  : String?
 
 )

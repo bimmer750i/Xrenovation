@@ -23,4 +23,5 @@ class House(
     @SerializedName("localid")
     var localid : String = ""
     constructor() : this(LatLon(0.0,0.0),"","","","","", arrayListOf(), arrayListOf())
+    fun isEmpty() : Boolean = address.isEmpty() && floors.isEmpty() && flats.isEmpty() && year.isEmpty() && description.isEmpty()
 }

@@ -62,10 +62,12 @@ class HouseFragmentViewModel @Inject constructor(val addCommentUseCase: AddComme
     }
 
     fun addComment(context : Context,houseId : String, text : String, displayName : String?, localId : String?, photoUrl : String?) {
-        viewModelScope.launch {
-            addCommentUseCase(sharedPrefsModel.getLocalId(context),houseId, Comment(houseId,0L,displayName!!,localId!!,photoUrl ?: "",0,false,"",text),sharedPrefsModel.getIdToken(context)).onEach {
-                _addCommentResult.postValue(it)
-            }.collect()
+        localId?.let {
+            viewModelScope.launch {
+                addCommentUseCase(sharedPrefsModel.getLocalId(context),houseId, Comment(houseId,0L,displayName ?: NO_DISPLAY_NAME,localId,photoUrl ?: "",0,false,"",text),sharedPrefsModel.getIdToken(context)).onEach {
+                    _addCommentResult.postValue(it)
+                }.collect()
+            }
         }
     }
 

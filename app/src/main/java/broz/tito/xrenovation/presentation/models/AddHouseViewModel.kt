@@ -76,11 +76,13 @@ class AddHouseViewModel @Inject constructor(val getAccountInfoUseCase: GetAccoun
         }
     }
 
-    fun searchPoint(point : Point) {
-        viewModelScope.launch(Dispatchers.IO) {
-            searchPointUseCase(point).onEach {
-                _searchPointResult.postValue(it)
-            }.collect()
+    fun searchPoint(point : Point?) {
+        point?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                searchPointUseCase(point).onEach {
+                    _searchPointResult.postValue(it)
+                }.collect()
+            }
         }
     }
 

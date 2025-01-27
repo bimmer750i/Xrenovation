@@ -61,36 +61,37 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                     disableViews()
                 }
                 is SuccessSignInByEmailResult -> {
-                    findNavController().navigate(R.id.action_signInFragment_to_accountInfoFragment)
                     (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_IN
                     hideProgressBar()
                     enableViews()
-
+                    viewModel.resetState()
+                    findNavController().navigate(R.id.action_signInFragment_to_accountInfoFragment)
                 }
                 is FailureSignInByEmailResult -> {
                     binding.textviewForgotPassword.visibility = View.VISIBLE
                     hideProgressBar()
                     enableViews()
                     when (it.errorMessage)  {
-                        "INVALID_EMAIL" -> {
+                        INVALID_EMAIL -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.incorrect_email))
                         }
-                        "EMAIL_NOT_FOUND" -> {
+                        EMAIL_NOT_FOUND -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.user_not_found))
                         }
-                        "INVALID_PASSWORD" -> {
+                        INVALID_PASSWORD -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.invalid_password))
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.error_try_again))
                         }
-                        "INVALID_LOGIN_CREDENTIALS" -> {
+                        INVALID_LOGIN_CREDENTIALS -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.wrong_email_or_password))
                         }
                         else -> {
                             showSnackBarShort(this,binding.signInFragmentLayout,getString(R.string.error_try_again))
                         }
                     }
+                    viewModel.resetState()
                 }
             }
         }

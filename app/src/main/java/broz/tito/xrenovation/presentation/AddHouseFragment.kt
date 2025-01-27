@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.add_house.HouseModel
+import broz.tito.xrenovation.data.add_house.POST_TIMEOUT
 import broz.tito.xrenovation.data.add_house.entities.*
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.AlertDialogAddUrlBinding
@@ -147,7 +148,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         })
         binding.imageViewAddressLocation.setOnClickListener {
             if (housePoint != null) {
-                val directions = AddHouseFragmentDirections.actionAddHouseFragmentToFindHouseOnMapFragment(LatLon(housePoint!!.latitude,housePoint!!.longitude))
+                val directions = AddHouseFragmentDirections.actionAddHouseFragmentToFindHouseOnMapFragment(LatLon((housePoint?.latitude ?: 0.0),(housePoint?.longitude ?: 0.0)))
                 findNavController().navigate(directions)
             }
             else {
@@ -210,7 +211,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is SuccessGetAccountInfoResult -> {
                     it.user.emailVerified?.let {verified ->
                         if (verified) {
-                            viewModel.searchPoint(housePoint!!)
+                            viewModel.searchPoint(housePoint)
                         }
                         else {
                             enableViews()
@@ -222,16 +223,16 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 is FailureGetAccountInfoResult -> {
                     viewModel.resetState()
                     when (it.errorMessage) {
-                        "INVALID_ID_TOKEN" -> {
+                        INVALID_ID_TOKEN -> {
                             viewModel.refreshToken(requireContext())
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
+                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
                             hideProgressBar()
                             enableViews()
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                             hideProgressBar()
@@ -256,16 +257,16 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     hideProgressBar()
                     viewModel.resetState()
                     when(it.errorMessage) {
-                        "TOKEN_EXPIRED" -> {
+                        TOKEN_EXPIRED -> {
                             showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
-                        "MISSING_REFRESH_TOKEN" -> {
+                        MISSING_REFRESH_TOKEN -> {
                             showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         else -> {
@@ -310,7 +311,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 }
                 is SuccessLoadPhotosResult -> {
                     viewModel.addHouse(requireContext(),"house", House(
-                        LatLon(housePoint!!.latitude,housePoint!!.longitude),
+                        LatLon(housePoint?.latitude ?: 0.0,housePoint?.longitude ?: 0.0),
                     binding.autoCompleteTextView.text.toString(),
                     binding.editTextNumberOfFloors.text.toString(),
                     binding.editTextNumberOfFlats.text.toString(),
@@ -325,7 +326,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     viewModel.resetState()
                     enableViews()
                     hideProgressBar()
-                    if (it.errorMessage == HouseModel.POST_TIMEOUT) {
+                    if (it.errorMessage == POST_TIMEOUT) {
                         showSnackBarShort(this,binding.root,getString(R.string.post_timeout_house))
                     }
                     else {
@@ -342,7 +343,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 }
                 is SuccessAddHouseResult -> {
                     addHouseResult.houseResponse.name?.let {name ->
-                        viewModel.addHousePoint(requireContext(),name,HousePoint(name,LatLon(housePoint!!.latitude,housePoint!!.longitude)))
+                        viewModel.addHousePoint(requireContext(),name,HousePoint(name,LatLon(housePoint?.latitude ?: 0.0,housePoint?.longitude  ?: 0.0)))
                     }
                 }
                 is FailureAddHouseResult -> {

@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 
 data class RawSignUpByEmailResponse (
-    @SerializedName("idToken"      ) var idToken      : String = "",
-    @SerializedName("email"        ) var email        : String = "",
-    @SerializedName("refreshToken" ) var refreshToken : String = "",
-    @SerializedName("expiresIn"    ) var expiresIn    : String = "",
-    @SerializedName("localId"      ) var localId      : String = "")
+    @SerializedName("idToken"      ) val idToken      : String?,
+    @SerializedName("email"        ) val email        : String?,
+    @SerializedName("refreshToken" ) val refreshToken : String?,
+    @SerializedName("expiresIn"    ) val expiresIn    : String?,
+    @SerializedName("localId"      ) val localId      : String?)

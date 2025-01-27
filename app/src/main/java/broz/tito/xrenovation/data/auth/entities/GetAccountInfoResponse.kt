@@ -4,36 +4,36 @@ import com.google.gson.annotations.SerializedName
 
 class GetAccountInfoResponse (
 
-    @SerializedName("users" ) var users : ArrayList<User> = arrayListOf()
+    @SerializedName("users" ) val users : ArrayList<User>?
 
 )
 
 data class User (
 
-    @SerializedName("localId"           ) var localId           : String?                     = null,
-    @SerializedName("email"             ) var email             : String?                     = null,
-    @SerializedName("emailVerified"     ) var emailVerified     : Boolean?                    = null,
-    @SerializedName("displayName"       ) var displayName       : String?                     = null,
-    @SerializedName("providerUserInfo"  ) var providerUserInfo  : ArrayList<ProviderInfo> = arrayListOf(),
-    @SerializedName("photoUrl"          ) var photoUrl          : String?                     = null,
-    @SerializedName("passwordHash"      ) var passwordHash      : String?                     = null,
-    @SerializedName("passwordUpdatedAt" ) var passwordUpdatedAt : String?                        = null,
-    @SerializedName("validSince"        ) var validSince        : String?                     = null,
-    @SerializedName("disabled"          ) var disabled          : Boolean?                    = null,
-    @SerializedName("lastLoginAt"       ) var lastLoginAt       : String?                     = null,
-    @SerializedName("createdAt"         ) var createdAt         : String?                     = null,
-    @SerializedName("customAuth"        ) var customAuth        : Boolean?                    = null
+    @SerializedName("localId"           ) val localId           : String?                     ,
+    @SerializedName("email"             ) val email             : String?                     ,
+    @SerializedName("emailVerified"     ) val emailVerified     : Boolean?                    ,
+    @SerializedName("displayName"       ) val displayName       : String?                     ,
+    @SerializedName("providerUserInfo"  ) val providerUserInfo  : ArrayList<ProviderInfo>? = arrayListOf(),
+    @SerializedName("photoUrl"          ) val photoUrl          : String?                     ,
+    @SerializedName("passwordHash"      ) val passwordHash      : String?                     ,
+    @SerializedName("passwordUpdatedAt" ) val passwordUpdatedAt : String?                        ,
+    @SerializedName("validSince"        ) val validSince        : String?                     ,
+    @SerializedName("disabled"          ) val disabled          : Boolean?                    ,
+    @SerializedName("lastLoginAt"       ) val lastLoginAt       : String?                     ,
+    @SerializedName("createdAt"         ) val createdAt         : String?                     ,
+    @SerializedName("customAuth"        ) val customAuth        : Boolean?
 
 )
 
 data class ProviderInfo (
 
-    @SerializedName("providerId"  ) var providerId  : String? = null,
-    @SerializedName("displayName" ) var displayName : String? = null,
-    @SerializedName("photoUrl"    ) var photoUrl    : String? = null,
-    @SerializedName("federatedId" ) var federatedId : String? = null,
-    @SerializedName("email"       ) var email       : String? = null,
-    @SerializedName("rawId"       ) var rawId       : String? = null,
-    @SerializedName("screenName"  ) var screenName  : String? = null
+    @SerializedName("providerId"  ) val providerId  : String? ,
+    @SerializedName("displayName" ) val displayName : String? ,
+    @SerializedName("photoUrl"    ) val photoUrl    : String? ,
+    @SerializedName("federatedId" ) val federatedId : String? ,
+    @SerializedName("email"       ) val email       : String? ,
+    @SerializedName("rawId"       ) val rawId       : String? ,
+    @SerializedName("screenName"  ) val screenName  : String?
 
 )

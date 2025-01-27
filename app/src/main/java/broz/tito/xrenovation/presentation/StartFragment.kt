@@ -58,16 +58,16 @@ class StartFragment : Fragment() {
                 }
                 is FailureRefreshTokenResult -> {
                     when(it.errorMessage) {
-                        "TOKEN_EXPIRED" -> {
+                        TOKEN_EXPIRED -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                         }
-                        "NO NETWORK" -> {
+                        NO_NETWORK -> {
                             (requireActivity().application as App).networkStatus = NetworkStatus.NO_NETWORK
                         }
                     }

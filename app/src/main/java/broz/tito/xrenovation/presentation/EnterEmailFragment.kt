@@ -66,7 +66,7 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable
                     hideProgressBar()
                     enableViews()
                     when(it.errorMessage) {
-                        "EMAIL_NOT_FOUND" -> {
+                        EMAIL_NOT_FOUND -> {
                             showSnackBarShort(this,binding.enterEmailFragmentLayout,getString(R.string.user_not_found))
                         }
                         else -> {

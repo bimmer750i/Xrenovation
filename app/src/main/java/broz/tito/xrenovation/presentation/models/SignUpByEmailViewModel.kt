@@ -36,7 +36,7 @@ class SignUpByEmailViewModel @Inject constructor(val useCase: SignUpByEmailUseCa
         viewModelScope.launch(Dispatchers.IO) {
             useCase(email, password).onEach {
                 Log.d(TAG, "signUpByEmail: result -- ${it.javaClass.simpleName}")
-                if (it is SuccessSignUpByEmailResult) {
+                if (it is SuccessSignUpByEmailResult && it.result.idToken != null && it.result.email != null && it.result.refreshToken != null && it.result.localId != null) {
                     saveSignUpResponseInfo(context,it.result.idToken,it.result.email,it.result.refreshToken,it.result.localId)
                 }
                 _signUpResult.postValue(it)

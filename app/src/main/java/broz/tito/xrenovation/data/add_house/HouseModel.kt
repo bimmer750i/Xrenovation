@@ -30,6 +30,10 @@ import java.io.File
 import java.util.Collections
 import javax.inject.Inject
 
+const val POST_TIMEOUT = "POST_TIMEOUT"
+const val CITY_NOT_FOUND = "CITY_NOT_FOUND"
+const val POST_DELAY_INTERVAL : Long = 10_000
+
 class HouseModel @Inject constructor(val searchManager: SearchManager, val storageReference : StorageReference, val houseService: HouseService, val timeService: TimeService) {
 
     private val TAG = "AddHouseModel"
@@ -83,13 +87,13 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 val house = components?.firstOrNull { it.kinds.contains(Address.Component.Kind.HOUSE) }?.name
                 components?.firstOrNull { it.kinds.contains(Address.Component.Kind.LOCALITY) }?.name.let {
                     if (it != null) {
-                        trySend(SuccessSearchPointResult(SearchPointAddress(province,area,it,street,house)))
                         Log.d(TAG, "region: $region -- province: $province district: $district")
                         Log.d(TAG, "success -- $area -- $it -- $street -- $house")
+                        trySend(SuccessSearchPointResult(SearchPointAddress(province,area,it,street,house)))
                     }
                     else {
-                        FailureSearchPointResult("CITY_NOT_FOUND")
                         Log.d(TAG, "failure -- search_point -- $it")
+                        FailureSearchPointResult(CITY_NOT_FOUND)
                     }
                 }
             }
@@ -105,17 +109,16 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         }
     }.flowOn(Dispatchers.Main)
 
-    //TODO TEST MODE -- CHANGE TIME CHECK METHOD
     fun loadPhotosToFireBase(localId: String,path: String, list : ArrayList<String>) : Flow<LoadPhotosResult> = flow<LoadPhotosResult> {
         var result : LoadPhotosResult = PendingLoadPhotosResult()
         emit(result)
         val lastTimePosted = getLastTimePosted(localId)
         val now = getTime() ?: TimeHelper.getUtcTime()
-        if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
-            result = FailureLoadPhotosResult("POST_TIMEOUT")
+        if (lastTimePosted != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
+            result = FailureLoadPhotosResult(POST_TIMEOUT)
             Log.d(TAG, "loadPhotosToFireBase -- failure: POST_TIMEOUT")
         }
-        else if (lastTimePosted != null && now != null) {
+        else if (lastTimePosted != null) {
             try {
                 val photosList = withContext(Dispatchers.IO) {async {
                     loadPhotos(path,list)
@@ -129,7 +132,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             }
         }
         else {
-            result = FailureLoadPhotosResult("POST_TIMEOUT")
+            result = FailureLoadPhotosResult(POST_TIMEOUT)
             Log.d(TAG, "loadPhotosToFireBase -- failure: POST_TIMEOUT")
         }
         emit(result)
@@ -144,7 +147,6 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         list.map {uri ->
             async(Dispatchers.IO) {
                 val index = list.indexOf(uri)
-                val time = System.currentTimeMillis()
                 val child = storageReference.child("$path-house/house-$index.jpg")
                     child.putFile(Uri.fromFile(File(uri)))
                         .await().also {
@@ -180,7 +182,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             result = FailureAddHouseResult(POST_TIMEOUT)
             Log.d(TAG, "addHouse -- failure: POST_TIMEOUT")
         }
-        else if (lastTimePosted?.lastTimePosted != null && now != null)  {
+        else if (lastTimePosted?.lastTimePosted != null)  {
             try {
                 val response = houseService.addHouse(body,accessToken)
                 Log.d(TAG, "addHouse: ${response.raw()}")
@@ -190,8 +192,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 }
                 else {
                     response.body()?.let {
-                        result = SuccessAddHouseResult(it)
                         Log.d(TAG, "addHouse -- success: ${it}")
+                        result = SuccessAddHouseResult(it)
                         addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
                     }
                 }
@@ -219,8 +221,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             }
             else {
                 response.body()?.let {
-                    result = SuccessAddHousePointResult(it)
                     Log.d(TAG, "addHouse_Point -- success: ${it}")
+                    result = SuccessAddHousePointResult(it)
                 }
             }
         }
@@ -266,8 +268,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             }
             else {
                 response.body()?.let {
-                    result = SuccessGetHouseResult(houseId,it)
                     Log.d(TAG, "getHouse -- success -- $it ")
+                    result = SuccessGetHouseResult(houseId,it)
                 }
             }
         }
@@ -286,7 +288,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         val now = getTime() ?: TimeHelper.getUtcTime()
         Log.d(TAG, "addComment -- lastTimePosted: ${lastTimePosted?.lastTimePosted}")
         if (lastTimePosted?.lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
-            result = FailureAddCommentResult("POST_TIMEOUT")
+            result = FailureAddCommentResult(POST_TIMEOUT)
             Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
         else if (lastTimePosted?.lastTimePosted != null && now != null)  {
@@ -300,8 +302,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 else {
                     response.body()?.let {
                         it.name?.let {
-                            result = SuccessAddCommentResult(it)
                             Log.d(TAG, "addComment -- success -- $it")
+                            result = SuccessAddCommentResult(it)
                             addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
                         }
                     }
@@ -313,7 +315,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             }
         }
         else {
-            result = FailureAddCommentResult("POST_TIMEOUT")
+            result = FailureAddCommentResult(POST_TIMEOUT)
             Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
 
@@ -332,12 +334,12 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             else {
                 response.body()?.let {
                     if (it is JsonNull) {
-                        result= RawSuccessGetCommentsResult(JsonObject())
                         Log.d(TAG, "getComments -- success -- no comments")
+                        result= RawSuccessGetCommentsResult(JsonObject())
                     }
                     else {
-                        result = RawSuccessGetCommentsResult(it as JsonObject)
                         Log.d(TAG, "getComments -- success -- $it")
+                        result = RawSuccessGetCommentsResult(it as JsonObject)
                     }
                 }
             }
@@ -355,7 +357,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         val lastTimePosted = getLastTimePosted(localId)
         val now = getTime() ?: TimeHelper.getUtcTime()
         if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
-                result = FailureAddHouseCorrectionResult("POST_TIMEOUT")
+                result = FailureAddHouseCorrectionResult(POST_TIMEOUT)
                 Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
         }
         else if (lastTimePosted != null && now != null) {
@@ -369,9 +371,9 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 else {
                     response.body()?.let {
                         it.name?.let {
+                            Log.d(TAG, "addHouseCorrection -- success: $it")
                             result = SuccessAddHouseCorrectionResult(it)
                             addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
-                            Log.d(TAG, "addHouseCorrection -- success: $it")
                         }
                     }
                 }
@@ -382,7 +384,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             }
         }
         else {
-            result = FailureAddHouseCorrectionResult("POST_TIMEOUT")
+            result = FailureAddHouseCorrectionResult(POST_TIMEOUT)
             Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
         }
         emit(result)
@@ -430,8 +432,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 else {
                     var result : LastTimePosted? = null
                     response.body()?.let {
-                        result = it
                         Log.d(TAG, "addLastTimePosted -- success $it")
+                        result = it
                     }
                     return@async result
                 }
@@ -455,8 +457,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 else {
                     var result : Long? = null
                     response.body()?.let {
-                        result = it.unixTime!!
                         Log.d(TAG, "getTime -- success $it")
+                        result = it.unixTime!!
                     }
                     return@async result
                 }
@@ -468,13 +470,4 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         }.await()
         return result
     }
-
-
-    companion object {
-        private const val POST_DELAY_INTERVAL : Long = 10_000
-        const val POST_TIMEOUT : String = "POST_TIMEOUT"
-    }
-
-
-
 }

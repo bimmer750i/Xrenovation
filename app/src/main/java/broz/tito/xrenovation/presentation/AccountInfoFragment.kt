@@ -117,15 +117,15 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is FailureGetAccountInfoResult -> {
                     when(it.errorMessage) {
-                        "INVALID_ID_TOKEN" -> {
+                        INVALID_ID_TOKEN -> {
                             viewModel.refreshToken(requireContext())
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             hideProgressBar()
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             hideProgressBar()
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
@@ -147,16 +147,16 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 is FailureRefreshTokenResult -> {
                     hideProgressBar()
                     when(it.errorMessage) {
-                        "TOKEN_EXPIRED" -> {
+                        TOKEN_EXPIRED -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
-                        "USER_DISABLED" -> {
+                        USER_DISABLED -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
-                        "MISSING_REFRESH_TOKEN" -> {
+                        MISSING_REFRESH_TOKEN -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         else -> {
@@ -212,13 +212,13 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 is FailureVerifyEmailResult -> {
                     binding.buttonVerifyEmail.progress = 0
                     when (it.errorMessage) {
-                        "INVALID_ID_TOKEN" -> {
+                        INVALID_ID_TOKEN -> {
                             showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))
                         }
-                        "USER_NOT_FOUND" -> {
+                        USER_NOT_FOUND -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
                         }
-                        "TOO_MANY_ATTEMPTS_TRY_LATER" -> {
+                        TOO_MANY_ATTEMPTS_TRY_LATER -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
                         }
                     }

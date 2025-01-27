@@ -1,7 +1,6 @@
 package broz.tito.xrenovation.presentation
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +18,11 @@ import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModelFactory
 import javax.inject.Inject
+
+private const val CAPTCHA_VERIFIED_KEY = "CAPTCHA_VERIFIED"
+private const val SIGN_UP_DONE_KEY = "SIGN_UP_DONE"
+private const val EMAIL_VERIFIED_KEY = "EMAIL_VERIFIED"
+
 
 class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
 
@@ -113,13 +117,13 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                     hideProgressBar()
                     enableViews()
                     when (it.errorMessage) {
-                        "EMAIL_EXISTS" -> {
+                        EMAIL_EXISTS -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_email_exists))
                         }
-                        "TOO_MANY_ATTEMPTS_TRY_LATER" -> {
+                        TOO_MANY_ATTEMPTS_TRY_LATER -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
                         }
-                        "EXCEPTION_OCCURRED" -> {
+                        EXCEPTION_OCCURRED -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_exception))
                         }
                     }
@@ -211,13 +215,5 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
     private fun showTextView() {
         binding.textViewAlreadySignedUp.visibility = View.VISIBLE
     }
-
-
-    companion object {
-        private val CAPTCHA_VERIFIED_KEY = "CAPTCHA_VERIFIED"
-        private val SIGN_UP_DONE_KEY = "SIGN_UP_DONE"
-        private val EMAIL_VERIFIED_KEY = "EMAIL_VERIFIED"
-    }
-
 
 }

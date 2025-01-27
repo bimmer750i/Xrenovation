@@ -9,7 +9,7 @@ data class SetAccountInfoResponse (
     @SerializedName("displayName"      ) var displayName      : String?,
     @SerializedName("photoUrl"         ) var photoUrl         : String?,
     @SerializedName("passwordHash"     ) var passwordHash     : String?,
-    @SerializedName("providerUserInfo" ) var providerUserInfo : ArrayList<ProviderUserInfo>? = arrayListOf(),
+    @SerializedName("providerUserInfo" ) var providerUserInfo : ArrayList<ProviderUserInfo>?,
     @SerializedName("idToken"          ) var idToken          : String?,
     @SerializedName("refreshToken"     ) var refreshToken     : String?,
     @SerializedName("expiresIn"        ) var expiresIn        : String?

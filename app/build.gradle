@@ -15,7 +15,7 @@ android {
         minSdk 26
         targetSdk 34
         versionCode 1
-        versionName "0.1"
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "MAPKIT_API_KEY", "\"${mapkitApiKey}\""
         buildConfigField "String", "FIREBASE_WEB_KEY", "\"${fireBaseWebKey}\""
@@ -28,9 +28,21 @@ android {
         viewBinding true
     }
 
+    signingConfigs {
+        release {
+            storeFile file("C:\\Users\\semio\\Androkey\\usadebt.jks")
+            storePassword "dzhubgAA39"
+            keyAlias "usa_national_debt_key"
+            keyPassword "dzhubgAA39"
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

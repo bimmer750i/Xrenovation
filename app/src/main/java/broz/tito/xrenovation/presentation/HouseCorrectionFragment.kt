@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
@@ -56,7 +57,14 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablab
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonSendCorrection.setOnClickListener {
-            viewModel.getAccountInfo(requireContext())
+            if (binding.editTextHouseCorrection.checkCorrectionLength { correctionLength ->
+                when (correctionLength) {
+                    CorrectionLength.SHORT -> showSnackBarShort(this,binding.root,getString(R.string.correction_too_short_error))
+                    CorrectionLength.LONG -> showSnackBarShort(this,binding.root,getString(R.string.correction_too_long_error))
+                }
+                }) {
+                viewModel.getAccountInfo(requireContext())
+            }
             binding.root.hideKeyboard()
         }
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
@@ -185,5 +193,15 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablab
 
     override fun disableViews() {
         binding.editTextHouseCorrection.isEnabled = false
+    }
+
+    fun EditText.checkCorrectionLength(lambda : (CorrectionLength) -> Unit) : Boolean {
+        if (this.length() < 20) {lambda(CorrectionLength.SHORT);return false}
+        else if (this.length() > 150) {lambda(CorrectionLength.LONG);return false}
+        else return true
+    }
+
+    enum class CorrectionLength {
+        SHORT,LONG
     }
 }

@@ -22,6 +22,7 @@ import broz.tito.xrenovation.data.add_house.POST_TIMEOUT
 import broz.tito.xrenovation.data.add_house.entities.*
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentHouseBinding
+import broz.tito.xrenovation.presentation.HouseCorrectionFragment.CorrectionLength
 import broz.tito.xrenovation.presentation.adapters.CommentsRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.interfaces.Disablable
@@ -107,7 +108,12 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             }
         }
         binding.buttonComment.setOnClickListener {
-            if (!binding.buttonComment.isIndeterminateProgressMode) {
+            if (!binding.buttonComment.isIndeterminateProgressMode && binding.editTextComment.checkCommentLength { commentLength ->
+                    when (commentLength) {
+                        CommentLength.SHORT -> showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.short_comment))
+                        CommentLength.LONG -> showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.long_comment))
+                    }
+                }) {
                 viewModel.getAccountInfo(requireContext())
                 binding.root.hideKeyboard()
             }
@@ -129,12 +135,8 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                 }
                 is SuccessGetAccountInfoResult -> {
                     it.user.emailVerified?.let {verified ->
-                        if (verified && binding.editTextComment.checkCommentLength()) {
+                        if (verified) {
                             viewModel.addComment(requireContext(),houseId,binding.editTextComment.text.toString(),it.user.displayName,it.user.localId,it.user.photoUrl)
-                        }
-                        else if (!binding.editTextComment.checkCommentLength()) {
-                            enableViews()
-                            viewModel.resetState()
                         }
                         else {
                             enableViews()
@@ -284,7 +286,13 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         binding.editTextComment.isEnabled = false
     }
 
-    fun EditText.checkCommentLength() : Boolean {
+    fun EditText.checkCommentLength(lambda : (CommentLength) -> Unit) : Boolean {
+        if (this.length() < 10) {lambda(CommentLength.SHORT);return false}
+        else if (this.length() > 80) {lambda(CommentLength.LONG);return false}
+        else return true
+    }
+
+    /*fun EditText.checkCommentLength() : Boolean {
         val text = this.text.toString()
         if (text.length < 10) {
             showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.short_comment))
@@ -297,6 +305,10 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         else {
             return true
         }
+    }*/
+
+    enum class CommentLength {
+        SHORT,LONG
     }
 
     fun Bundle.putHouse(house: House) : Bundle {

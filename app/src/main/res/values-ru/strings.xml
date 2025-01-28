@@ -92,6 +92,8 @@
     <string name="comments">Комментарии</string>
     <string name="suggest_house_correction">Предложить правку</string>
     <string name="correction_added">Правка успешно добавлена</string>
+    <string name="correction_too_short_error">Минимальная длина правки - 20 символов</string>
+    <string name="correction_too_long_error">Максимальная длина правки - 150 символов</string>
     <string name="post_timeout_house">Таймаут, добавьте дом чуть позже</string>
     <string name="post_timeout_comment">Таймаут, добавьте комментарий чуть позже</string>
     <string name="post_timeout_correction">Таймаут, добавьте правку чуть позже</string>

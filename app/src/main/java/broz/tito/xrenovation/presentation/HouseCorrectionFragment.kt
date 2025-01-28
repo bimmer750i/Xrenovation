@@ -1,6 +1,7 @@
 package broz.tito.xrenovation.presentation
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -63,33 +64,34 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablab
                     CorrectionLength.LONG -> showSnackBarShort(this,binding.root,getString(R.string.correction_too_long_error))
                 }
                 }) {
-                viewModel.getAccountInfo(requireContext())
+                viewModel.addHouseCorrection3(requireContext(),HouseCorrection(0,houseId ?: "","",binding.editTextHouseCorrection.text.toString()))
             }
             binding.root.hideKeyboard()
         }
-        viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
+
+        viewModel.addHouseCorrectionResult.observe(viewLifecycleOwner, Observer {
             when (it) {
-                is PendingGetAccountInfoResult -> {
+                is PendingAddHouseCorrectionResult -> {
                     showProgressBar()
                     disableViews()
                 }
-                is SuccessGetAccountInfoResult -> {
-                    it.user.emailVerified?.let {verified ->
-                        if (verified && it.user.localId != null) {
-                            viewModel.addHouseCorrection(requireContext(),HouseCorrection(0,houseId ?: "",it.user.localId,binding.editTextHouseCorrection.text.toString()))
-                        }
-                        else {
+                is SuccessAddHouseCorrectionResult -> {
+                    hideProgressBar()
+                    enableViews()
+                    showSnackBarLong(this,binding.root,getString(R.string.correction_added))
+                    viewModel.resetModel()
+                }
+                is FailureAddHouseCorrectionResult -> {
+                    when (it.errorMessage) {
+                        EMAIL_NOT_VERIFIED -> {
                             showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
                             hideProgressBar()
                             enableViews()
-                            viewModel.resetModel()
                         }
-                    }
-                }
-                is FailureGetAccountInfoResult -> {
-                    when (it.errorMessage) {
-                        INVALID_ID_TOKEN -> {
-                            viewModel.refreshToken(requireContext())
+                        POST_TIMEOUT -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(this,binding.root,getString(R.string.post_timeout_correction))
                         }
                         USER_NOT_FOUND -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
@@ -103,71 +105,26 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablab
                             hideProgressBar()
                             enableViews()
                         }
-                        else -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                            hideProgressBar()
-                            enableViews()
-                        }
-                    }
-                    viewModel.resetModel()
-                }
-            }
-        }
-        viewModel.refreshTokenResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is SuccessRefreshTokenResult -> {
-                    viewModel.getAccountInfo(requireContext())
-                }
-                is FailureRefreshTokenResult -> {
-                    when(it.errorMessage) {
                         TOKEN_EXPIRED -> {
                             hideProgressBar()
                             enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.token_expired_error))
-                        }
-                        USER_DISABLED -> {
-                            hideProgressBar()
-                            enableViews()
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                        }
-                        USER_NOT_FOUND -> {
-                            hideProgressBar()
-                            enableViews()
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
                         }
                         MISSING_REFRESH_TOKEN -> {
                             hideProgressBar()
                             enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
+                        NO_NETWORK -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
+                        }
                         else -> {
                             hideProgressBar()
                             enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
-                    }
-                    viewModel.resetModel()
-                }
-            }
-        }
-        viewModel.addHouseCorrectionResult.observe(viewLifecycleOwner, Observer {
-            when (it) {
-                is SuccessAddHouseCorrectionResult -> {
-                    hideProgressBar()
-                    enableViews()
-                    showSnackBarLong(this,binding.root,getString(R.string.correction_added))
-                    viewModel.resetModel()
-                }
-                is FailureAddHouseCorrectionResult -> {
-                    if (it.errorMessage == POST_TIMEOUT) {
-                        hideProgressBar()
-                        enableViews()
-                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout_correction))
-                    }
-                    else {
-                        hideProgressBar()
-                        enableViews()
-                        showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                     }
                     viewModel.resetModel()
                 }

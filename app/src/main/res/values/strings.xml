@@ -91,7 +91,7 @@
     <string name="leave_comment">Leave comment here</string>
     <string name="comments">Comments</string>
     <string name="suggest_house_correction">Suggest correction</string>
-    <string name="correction_added">Correction added successfully!</string>
+    <string name="correction_added">The correction is under moderation</string>
     <string name="correction_too_short_error">The correction must be at least 20 symbols long</string>
     <string name="correction_too_long_error">The correction must be less 150 symbols long</string>
     <string name="post_timeout_house">Timeout, upload your house later, please</string>

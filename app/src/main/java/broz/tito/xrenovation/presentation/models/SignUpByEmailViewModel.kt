@@ -7,73 +7,79 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import broz.tito.xrenovation.data.auth.entities.CaptchaResult
+import broz.tito.xrenovation.data.auth.entities.FailureCaptchaResult
+import broz.tito.xrenovation.data.auth.entities.FailureSignUpByEmailResult
+import broz.tito.xrenovation.data.auth.entities.PendingSignUpByEmailResult
 import broz.tito.xrenovation.data.auth.entities.SignUpByEmailResult
+import broz.tito.xrenovation.data.auth.entities.SuccessCaptchaResult
 import broz.tito.xrenovation.data.auth.entities.SuccessSignUpByEmailResult
-import broz.tito.xrenovation.data.auth.entities.VerifyEmailResult
 import broz.tito.xrenovation.domain.*
+import broz.tito.xrenovation.presentation.REGISTRATION_ERROR
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class SignUpByEmailViewModel @Inject constructor(val useCase: SignUpByEmailUseCase, val captchaUseCase: VerifyCaptchaUseCase,
-                                                 val sharedPrefsUseCase : SaveAuthResponseUseCase, val verifyEmailUseCase : SendEmailVerificationCodeUseCase,
-                                                 val getIdTokenUseCase: GetIdTokenUseCase) : ViewModel() {
+                                                 val saveAuthResponseUseCase : SaveAuthResponseUseCase) : ViewModel() {
 
     private val TAG = "SignUpByEmailViewModel"
 
     private val _signUpResult  = MutableLiveData<SignUpByEmailResult>()
     val signUpResult : LiveData<SignUpByEmailResult> = _signUpResult
 
-    private val _verifyCaptchaResult  = MutableLiveData<CaptchaResult>()
-    val verifyCaptchaResult : LiveData<CaptchaResult> = _verifyCaptchaResult
-
-    private val _verifyEmailResult  = MutableLiveData<VerifyEmailResult>()
-    val verifyEmailResult : LiveData<VerifyEmailResult> = _verifyEmailResult
-
-    fun signUpByEmail(context: Context,email: String,password : String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private suspend fun signUpByEmail1(context: Context,email: String,password : String)
+    : SignUpByEmailResult = coroutineScope {
+        async {
             useCase(email, password).onEach {
                 Log.d(TAG, "signUpByEmail: result -- ${it.javaClass.simpleName}")
                 if (it is SuccessSignUpByEmailResult && it.result.idToken != null && it.result.email != null && it.result.refreshToken != null && it.result.localId != null) {
-                    saveSignUpResponseInfo(context,it.result.idToken,it.result.email,it.result.refreshToken,it.result.localId)
+                    saveAuthResponseUseCase(context, it.result.idToken, email, it.result.refreshToken, it.result.localId)
                 }
-                _signUpResult.postValue(it)
-            }.collect()
-        }
+            }.last()
+        }.await()
     }
 
-    fun verifyCaptcha(serverToken : String,ip : String,captchaToken : String) {
+    private suspend fun verifyCaptcha1(serverToken : String,ip : String,captchaToken : String) : CaptchaResult = coroutineScope {
+        async {
+            captchaUseCase(serverToken, ip, captchaToken).last()
+        }.await()
+    }
+
+    fun signUpByEmail(context: Context,email: String,password : String,serverToken : String,ip : String,captchaToken : String) {
         viewModelScope.launch(Dispatchers.IO) {
-            captchaUseCase(serverToken, ip, captchaToken).onEach {
-                Log.d(TAG, "verifyCaptcha: result -- ${it.javaClass.simpleName}")
-                _verifyCaptchaResult.postValue(it)
-            }.collect()
+            _signUpResult.postValue(PendingSignUpByEmailResult())
+            // VERIFYING CAPTCHA
+            val captchaResult = verifyCaptcha1(serverToken, ip, captchaToken)
+            when (captchaResult) {
+                // IF SUCCESSFUL RESPONSE FROM CAPTCHA WAS RECEIVED
+                is SuccessCaptchaResult -> {
+                    when (captchaResult.response.status) {
+                        // CAPTCHA VERIFIED, SIGNING UP BY EMAIL
+                        "ok" -> {
+                            val signUpByEmailResult = signUpByEmail1(context, email, password)
+                            _signUpResult.postValue(signUpByEmailResult)
+                        }
+                        // CAPTCHA NOT VERIFIED, THE USER IS A BOT !!!
+                        else -> {
+                            _signUpResult.postValue(FailureSignUpByEmailResult(REGISTRATION_ERROR))
+                        }
+                    }
+                }
+                // FAILED TO VERIFY CAPTCHA
+                is FailureCaptchaResult -> {
+                    _signUpResult.postValue(FailureSignUpByEmailResult(REGISTRATION_ERROR))
+                }
+            }
         }
-    }
-
-    private fun saveSignUpResponseInfo(context: Context, idToken : String, email : String, refreshToken : String, localId : String) {
-        sharedPrefsUseCase(context, idToken, email, refreshToken, localId)
-        Log.d(TAG, "Info saved -- $email -- idToken: ${idToken.subSequence(0,4)} -- localId: ${localId.subSequence(0,4)}")
-    }
-
-    fun sendEmailVerificationCode(idToken: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            verifyEmailUseCase(idToken).onEach {
-                _verifyEmailResult.postValue(it)
-            }.collect()
-        }
-    }
-
-    fun getIdToken(context: Context) : String {
-        return getIdTokenUseCase(context)
     }
 
     fun resetViewModelState() {
         _signUpResult.postValue(SignUpByEmailResult())
-        _verifyCaptchaResult.postValue(CaptchaResult())
-        _verifyEmailResult.postValue(VerifyEmailResult())
     }
 
 }

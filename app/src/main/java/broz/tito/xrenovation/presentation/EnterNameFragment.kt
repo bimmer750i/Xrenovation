@@ -76,50 +76,37 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                 }
 
                 is FailureSetAccountInfoResult -> {
-                    if (it.errorMessage == INVALID_ID_TOKEN) {
-                        enterNameViewModel.refreshToken(requireContext())
+                    when (it.errorMessage) {
+                        USER_NOT_FOUND -> {
+                            hideProgressBar()
+                            enableViews()
+                            findNavController().navigateUp()
+                            enterNameViewModel.resetState()
+                        }
+                        NO_NETWORK -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(
+                                this,
+                                binding.enterNameFragmentLayout,
+                                getString(R.string.no_network_try_again)
+                            )
+                            enterNameViewModel.resetState()
+                        }
+                        else -> {
+                            hideProgressBar()
+                            enableViews()
+                            showSnackBarShort(
+                                this,
+                                binding.enterNameFragmentLayout,
+                                getString(R.string.error_try_again)
+                            )
+                            enterNameViewModel.resetState()
+                        }
                     }
-                    else if (it.errorMessage == USER_NOT_FOUND) {
-                        hideProgressBar()
-                        enableViews()
-                        findNavController().navigateUp()
-                        enterNameViewModel.resetState()
-                    } else {
-                        hideProgressBar()
-                        enableViews()
-                        showSnackBarShort(
-                            this,
-                            binding.enterNameFragmentLayout,
-                            getString(R.string.error_try_again)
-                        )
-                        enterNameViewModel.resetState()
-                    }
+
                 }
             }
-        }
-        enterNameViewModel.refreshTokenResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is SuccessRefreshTokenResult -> {
-                    enterNameViewModel.setAccountInfo(
-                        requireContext(),
-                        binding.editTextTextPersonName.text.toString(),
-                        null,
-                        null
-                    )
-                }
-
-                is FailureRefreshTokenResult -> {
-                    hideProgressBar()
-                    enableViews()
-                    showSnackBarShort(
-                        this,
-                        binding.enterNameFragmentLayout,
-                        getString(R.string.error_try_again)
-                    )
-                    enterNameViewModel.resetState()
-                }
-            }
-
         }
     }
 

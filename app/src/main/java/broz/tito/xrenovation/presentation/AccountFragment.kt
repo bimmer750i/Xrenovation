@@ -19,11 +19,6 @@ import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModelFactory
 import javax.inject.Inject
 
-private const val CAPTCHA_VERIFIED_KEY = "CAPTCHA_VERIFIED"
-private const val SIGN_UP_DONE_KEY = "SIGN_UP_DONE"
-private const val EMAIL_VERIFIED_KEY = "EMAIL_VERIFIED"
-
-
 class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
 
     private val TAG = "AccountFragment"
@@ -34,17 +29,9 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
     private lateinit var viewModel: SignUpByEmailViewModel
     private lateinit var binding: FragmentAccountBinding
 
-    private var captchaVerified =  false
-    private var signUpDone = false
-    private var emailVerified = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState != null) {
-            captchaVerified = savedInstanceState.getBoolean(CAPTCHA_VERIFIED_KEY,false)
-            signUpDone = savedInstanceState.getBoolean(SIGN_UP_DONE_KEY,false)
-            emailVerified = savedInstanceState.getBoolean(EMAIL_VERIFIED_KEY,false)
-        }
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             // FUCK YOU, STUPID NAVIGATION COMPONENT X2
         }
@@ -67,39 +54,11 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
         }
         parentFragmentManager.setFragmentResultListener(CaptchaFragment.CAPTCHA_TOKEN_CODE,this) { result,data ->
             val token = data.getString(CaptchaFragment.CAPTCHA_TOKEN_VALUE,"")
-            if (token.isNotEmpty() && !captchaVerified) {
+            if (token.isNotEmpty()) {
                 hideTextView()
-                viewModel.verifyCaptcha(BuildConfig.CAPTCHA_SERVER_KEY,"0.0.0.0",token)
+                viewModel.signUpByEmail(requireContext(),binding.editTextEmailSignUp.text.toString(),binding.editTextPasswordSignUp.text.toString(),BuildConfig.CAPTCHA_SERVER_KEY,"0.0.0.0",token)
             }
         }
-        viewModel.verifyCaptchaResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is PendingCaptchaResult -> {
-                    showProgressBar()
-                    disableViews()
-                }
-                is SuccessCaptchaResult -> {
-                    hideProgressBar()
-                    enableViews()
-                    if (it.response.status == "ok" && !signUpDone) {
-                        captchaVerified = true
-                        viewModel.signUpByEmail(requireContext(),binding.editTextEmailSignUp.text.toString(),binding.editTextPasswordSignUp.text.toString())
-                    }
-                    else if (it.response.status != "ok" && !signUpDone) {
-                        captchaVerified = true
-                        showSnackBarShort(this,binding.root,getString(R.string.sign_up_error))
-                    }
-                }
-                is FailureCaptchaResult -> {
-                    enableViews()
-                    hideProgressBar()
-                    showSnackBarShort(this,binding.root,getString(R.string.sign_up_error))
-                    captchaVerified = false
-                    showTextView()
-                }
-            }
-        }
-
         viewModel.signUpResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingSignUpByEmailResult -> {
@@ -109,7 +68,6 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                 is SuccessSignUpByEmailResult -> {
                     hideProgressBar()
                     enableViews()
-                    signUpDone = true
                     findNavController().navigate(R.id.action_accountFragment_to_enterNameFragment)
                 }
                 is FailureSignUpByEmailResult -> {
@@ -123,22 +81,17 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                         TOO_MANY_ATTEMPTS_TRY_LATER -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
                         }
-                        EXCEPTION_OCCURRED -> {
+                        NO_NETWORK -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
+                        }
+                        else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_exception))
                         }
                     }
-                    signUpDone = false
                 }
             }
         }
         return binding.root
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(CAPTCHA_VERIFIED_KEY,captchaVerified)
-        outState.putBoolean(SIGN_UP_DONE_KEY,signUpDone)
-        outState.putBoolean(EMAIL_VERIFIED_KEY,emailVerified)
     }
 
     override fun showProgressBar() {
@@ -168,7 +121,6 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
     }
 
     private fun signUpByEmail() {
-        resetState()
         viewModel.resetViewModelState()
         if (binding.editTextEmailSignUp.text.toString().checkIfEmailCorrect() && checkIfPasswordsAreSame() && isPasswordStrong()) {
             hideTextView()
@@ -194,11 +146,6 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
         }
     }
 
-    private fun resetState() {
-        captchaVerified =  false
-        signUpDone = false
-        emailVerified = false
-    }
 
     private fun checkIfPasswordsAreSame() : Boolean {
         return binding.editTextPasswordSignUp.text.toString() == binding.editTextPasswordConfirmSignUp.text.toString()

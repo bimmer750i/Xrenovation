@@ -28,21 +28,9 @@ android {
         viewBinding true
     }
 
-    signingConfigs {
-        release {
-            storeFile file("C:\\Users\\semio\\Androkey\\usadebt.jks")
-            storePassword "dzhubgAA39"
-            keyAlias "usa_national_debt_key"
-            keyPassword "dzhubgAA39"
-        }
-    }
-
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
-            debuggable false
-            signingConfig signingConfigs.release
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

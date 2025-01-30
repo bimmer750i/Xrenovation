@@ -33,7 +33,7 @@ suspend fun refreshToken(context: Context,refreshTokenUseCase : RefreshTokenUseC
 }
 
 suspend fun getAccountInfo(context: Context, getAccountInfoUseCase : GetAccountInfoUseCase,sharedPrefsModel: SharedPrefsModel)
-: GetAccountInfoResult = coroutineScope { async {
+: GetAccountInfoResult = coroutineScope { async(Dispatchers.IO) {
     return@async getAccountInfoUseCase(sharedPrefsModel.getIdToken(context)).last()
 }.await()
 }

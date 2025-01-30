@@ -79,7 +79,7 @@ class HouseFragmentViewModel @Inject constructor(val addCommentUseCase: AddComme
 
 
     fun addComment(context : Context,houseId : String, text : String) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 _addCommentResult.postValue(PendingAddCommentResult())
                 // GETTING ACCOUNT INFO
                 val getAccountInfoResult = getAccountInfo(context, getAccountInfoUseCase, sharedPrefsModel)

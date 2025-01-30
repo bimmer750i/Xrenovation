@@ -72,17 +72,6 @@ class AccountInfoViewModel @Inject constructor(val getAccountInfoUseCase: GetAcc
         }
     }
 
-    /*fun refreshToken(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            refreshTokenUseCase(sharedPrefsModel.getRefreshToken(context)).onEach {
-                if (it is SuccessRefreshTokenResult) {
-                    saveAuthResponseUseCase(context,it.response.idToken,null,it.response.refreshToken,null)
-                }
-                _refreshTokenResult.postValue(it)
-            }.collect()
-        }
-    }*/
-
     fun uploadProfilePicture(context : Context, file : File) {
         viewModelScope.launch(Dispatchers.IO) {
             uploadProfilePictureUseCase(context, file).onEach {

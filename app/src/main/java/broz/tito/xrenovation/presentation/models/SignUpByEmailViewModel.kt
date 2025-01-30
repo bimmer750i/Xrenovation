@@ -34,7 +34,7 @@ class SignUpByEmailViewModel @Inject constructor(val useCase: SignUpByEmailUseCa
 
     private suspend fun signUpByEmail1(context: Context,email: String,password : String)
     : SignUpByEmailResult = coroutineScope {
-        async {
+        async(Dispatchers.IO) {
             useCase(email, password).onEach {
                 Log.d(TAG, "signUpByEmail: result -- ${it.javaClass.simpleName}")
                 if (it is SuccessSignUpByEmailResult && it.result.idToken != null && it.result.email != null && it.result.refreshToken != null && it.result.localId != null) {
@@ -45,7 +45,7 @@ class SignUpByEmailViewModel @Inject constructor(val useCase: SignUpByEmailUseCa
     }
 
     private suspend fun verifyCaptcha1(serverToken : String,ip : String,captchaToken : String) : CaptchaResult = coroutineScope {
-        async {
+        async(Dispatchers.IO) {
             captchaUseCase(serverToken, ip, captchaToken).last()
         }.await()
     }

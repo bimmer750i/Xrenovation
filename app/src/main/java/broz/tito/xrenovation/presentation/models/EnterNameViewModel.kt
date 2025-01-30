@@ -42,7 +42,7 @@ class EnterNameViewModel @Inject constructor(val setAccountInfoUseCase: SetAccou
                        displayName: String?,
                        photoUrl: String?,
                        deleteAttribute: ArrayList<String>?) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _setAccountInfoResult.postValue(PendingSetAccountInfoResult())
             val setAccountInfoResult = setAccountInfo1(context, displayName, photoUrl, deleteAttribute)
             when (setAccountInfoResult) {

@@ -114,7 +114,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                         CommentLength.LONG -> showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.long_comment))
                     }
                 }) {
-                viewModel.getAccountInfo(requireContext())
+                viewModel.addComment(requireContext(),houseId,binding.editTextComment.text.toString())
                 binding.root.hideKeyboard()
             }
         }
@@ -128,77 +128,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                 true }
             popupMenu.show()
         }
-        viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is PendingGetAccountInfoResult -> {
-                    disableViews()
-                }
-                is SuccessGetAccountInfoResult -> {
-                    it.user.emailVerified?.let {verified ->
-                        if (verified) {
-                            viewModel.addComment(requireContext(),houseId,binding.editTextComment.text.toString(),it.user.displayName,it.user.localId,it.user.photoUrl)
-                        }
-                        else {
-                            enableViews()
-                            showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
-                            viewModel.resetState()
-                        }
-                    }
-                }
-                is FailureGetAccountInfoResult -> {
-                    when (it.errorMessage) {
-                        INVALID_ID_TOKEN -> {
-                            viewModel.refreshToken(requireContext())
-                        }
-                        USER_NOT_FOUND -> {
-                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
-                            enableViews()
-                            viewModel.resetState()
-                        }
-                        USER_DISABLED -> {
-                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                            enableViews()
-                            viewModel.resetState()
-                        }
-                        else -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                            enableViews()
-                            viewModel.resetState()
-                        }
-                    }
-                }
-            }
-        }
-        viewModel.refreshTokenResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is SuccessRefreshTokenResult -> {
-                    viewModel.getAccountInfo(requireContext())
-                }
-                is FailureRefreshTokenResult -> {
-                    enableViews()
-                    when(it.errorMessage) {
-                        TOKEN_EXPIRED -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.token_expired_error))
-                        }
-                        USER_DISABLED -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                        }
-                        USER_NOT_FOUND -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
-                        }
-                        MISSING_REFRESH_TOKEN -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
-                        }
-                        else -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                        }
-                    }
-                    viewModel.resetState()
-                }
-            }
-        }
+
         viewModel.addCommentResult.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is PendingAddCommentResult -> {
@@ -220,16 +150,25 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
                             showSnackBarShort(this,binding.root,getString(R.string.post_timeout_comment))
                         }
                         TOKEN_EXPIRED -> {
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         USER_DISABLED -> {
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         USER_NOT_FOUND -> {
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                         MISSING_REFRESH_TOKEN -> {
                             showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
+                        }
+                        EMAIL_NOT_VERIFIED -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
+                        }
+                        NO_NETWORK -> {
+                            showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
                         }
                         else -> {
                             showSnackBarShort(this,binding.root,getString(R.string.failed_to_send_comment))
@@ -241,9 +180,6 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         })
         viewModel.getCommentsResult.observe(viewLifecycleOwner, Observer {
             when (it) {
-                is PendingGetCommentsResult -> {
-
-                }
                 is SuccessGetCommentsResult -> {
                     if (it.commentsList.size > 0) {
                         binding.recyclerviewComments.visibility = View.VISIBLE
@@ -291,21 +227,6 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         else if (this.length() > 80) {lambda(CommentLength.LONG);return false}
         else return true
     }
-
-    /*fun EditText.checkCommentLength() : Boolean {
-        val text = this.text.toString()
-        if (text.length < 10) {
-            showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.short_comment))
-            return false
-        }
-        else if (text.length > 80) {
-            showSnackBarShort(this@HouseFragment,binding.root,getString(R.string.long_comment))
-            return false
-        }
-        else {
-            return true
-        }
-    }*/
 
     enum class CommentLength {
         SHORT,LONG

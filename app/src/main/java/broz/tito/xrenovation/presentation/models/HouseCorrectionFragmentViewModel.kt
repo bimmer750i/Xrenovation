@@ -39,10 +39,6 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
     private val _addHouseCorrectionResult = MutableLiveData<AddHouseCorrectionResult>()
     val addHouseCorrectionResult: LiveData<AddHouseCorrectionResult> = _addHouseCorrectionResult
 
-    private suspend fun getAccountInfo(context: Context) : GetAccountInfoResult = coroutineScope { async {
-        return@async getAccountInfoUseCase(sharedPrefsModel.getIdToken(context)).last()
-    }.await()
-    }
 
     private suspend fun refreshToken(context: Context) : RefreshTokenResult = coroutineScope { async(Dispatchers.IO) {
         return@async refreshTokenUseCase(sharedPrefsModel.getRefreshToken(context)).onEach {
@@ -72,7 +68,7 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
     fun addHouseCorrection3(context: Context, houseCorrection: HouseCorrection) {
         viewModelScope.launch {
             _addHouseCorrectionResult.postValue(PendingAddHouseCorrectionResult())
-            val accountInfoResult = getAccountInfo(context)
+            val accountInfoResult = getAccountInfo(context,getAccountInfoUseCase, sharedPrefsModel)
 
             when(accountInfoResult) {
                 is SuccessGetAccountInfoResult -> {
@@ -101,7 +97,7 @@ class HouseCorrectionFragmentViewModel @Inject constructor(val getAccountInfoUse
                             when (refreshTokenResult) {
                                 // IF TOKEN WAS REFRESHED SUCCESSFULLY, GETTING ACCOUNT INFO
                                 is SuccessRefreshTokenResult -> {
-                                    val getAccountInfoResultAgain = getAccountInfo(context)
+                                    val getAccountInfoResultAgain = getAccountInfo(context,getAccountInfoUseCase, sharedPrefsModel)
                                     when (getAccountInfoResultAgain) {
                                         // IF GETTING ACCOUNT INFO WAS SUCCESSFUL AFTER REFRESH, CHECKING IF EMAIL VERIFIED IS STARTED
                                         is SuccessGetAccountInfoResult -> {

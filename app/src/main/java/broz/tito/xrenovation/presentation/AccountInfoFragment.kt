@@ -83,6 +83,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                     binding.buttonVerifyEmail.visibility = View.GONE
                 }
                 is SuccessGetAccountInfoResult -> {
+                    isLoaded = true
                     if (it.user.displayName == null) {
                         viewModel.setAccountInfo(requireContext(),"user-${it.user.localId?.take(10)}",null)
                     }
@@ -117,49 +118,24 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is FailureGetAccountInfoResult -> {
                     when(it.errorMessage) {
-                        INVALID_ID_TOKEN -> {
-                            viewModel.refreshToken(requireContext())
-                        }
-                        USER_NOT_FOUND -> {
-                            hideProgressBar()
-                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
-                        }
-                        USER_DISABLED -> {
-                            hideProgressBar()
-                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
-                        }
-                        else -> {
-                            hideProgressBar()
-                            showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.get_account_info_error))
-                        }
-                    }
-                }
-            }
-        }
-        viewModel.refreshTokenResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is SuccessRefreshTokenResult -> {
-                    viewModel.getAccountInfo(requireContext())
-                    isLoaded = true
-                }
-                is FailureRefreshTokenResult -> {
-                    hideProgressBar()
-                    when(it.errorMessage) {
                         TOKEN_EXPIRED -> {
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
-                        }
-                        USER_DISABLED -> {
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
-                        }
-                        USER_NOT_FOUND -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         MISSING_REFRESH_TOKEN -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
+                        USER_NOT_FOUND -> {
+                            hideProgressBar()
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                        }
+                        USER_DISABLED -> {
+                            hideProgressBar()
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                        }
                         else -> {
+                            hideProgressBar()
                             showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.get_account_info_error))
                         }
                     }

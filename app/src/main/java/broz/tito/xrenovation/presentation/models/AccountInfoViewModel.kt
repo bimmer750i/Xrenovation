@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.data.sharedprefs.SharedPrefsModel
 import broz.tito.xrenovation.domain.*
+import broz.tito.xrenovation.presentation.INVALID_ID_TOKEN
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
-class AccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCase,
+class AccountInfoViewModel @Inject constructor(val getAccountInfoUseCase: GetAccountInfoUseCase,
                                                val refreshTokenUseCase: RefreshTokenUseCase,
                                                val saveAuthResponseUseCase: SaveAuthResponseUseCase,
                                                val logOutUseCase: LogOutUseCase,
@@ -26,9 +27,6 @@ class AccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCas
 
     private val _getAccountInfoResult = MutableLiveData<GetAccountInfoResult>()
     val getAccountInfoResult : LiveData<GetAccountInfoResult> = _getAccountInfoResult
-
-    private val _refreshTokenResult = MutableLiveData<RefreshTokenResult>()
-    val refreshTokenResult : LiveData<RefreshTokenResult> = _refreshTokenResult
 
     private val _uploadProfilePictureResult = MutableLiveData<UploadProfilePictureResult>()
     val uploadProfilePictureResult : LiveData<UploadProfilePictureResult> = _uploadProfilePictureResult
@@ -45,13 +43,36 @@ class AccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCas
 
     fun getAccountInfo(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
-            useCase(sharedPrefsModel.getIdToken(context)).onEach {
-               _getAccountInfoResult.postValue(it)
+            getAccountInfoUseCase(sharedPrefsModel.getIdToken(context)).onEach { accountInfoResult ->
+                when (accountInfoResult) {
+                    is FailureGetAccountInfoResult -> {
+                        when (accountInfoResult.errorMessage) {
+                            INVALID_ID_TOKEN -> {
+                                val refreshTokenResult = refreshToken(context, refreshTokenUseCase, sharedPrefsModel, saveAuthResponseUseCase)
+                                when (refreshTokenResult) {
+                                    is SuccessRefreshTokenResult -> {
+                                        val accountInfoResultAgain = broz.tito.xrenovation.presentation.models.getAccountInfo(context,getAccountInfoUseCase, sharedPrefsModel)
+                                        _getAccountInfoResult.postValue(accountInfoResultAgain)
+                                    }
+                                    is FailureRefreshTokenResult -> {
+                                        _getAccountInfoResult.postValue(FailureGetAccountInfoResult(refreshTokenResult.errorMessage))
+                                    }
+                                }
+                            }
+                            else -> {
+                                _getAccountInfoResult.postValue(accountInfoResult)
+                            }
+                        }
+                    }
+                    else -> {
+                        _getAccountInfoResult.postValue(accountInfoResult)
+                    }
+                }
             }.collect()
         }
     }
 
-    fun refreshToken(context: Context) {
+    /*fun refreshToken(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             refreshTokenUseCase(sharedPrefsModel.getRefreshToken(context)).onEach {
                 if (it is SuccessRefreshTokenResult) {
@@ -60,7 +81,7 @@ class AccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCas
                 _refreshTokenResult.postValue(it)
             }.collect()
         }
-    }
+    }*/
 
     fun uploadProfilePicture(context : Context, file : File) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -87,7 +108,6 @@ class AccountInfoViewModel @Inject constructor(val useCase: GetAccountInfoUseCas
     }
 
     fun resetGetAccountInfoViewModelState() {
-        _refreshTokenResult.postValue(RefreshTokenResult())
         _uploadProfilePictureResult.postValue(UploadProfilePictureResult())
         _setAccountInfoResult.postValue(SetAccountInfoResult())
         _verifyEmailResult.postValue(VerifyEmailResult())

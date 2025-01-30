@@ -1,9 +1,11 @@
 package broz.tito.xrenovation.presentation.models
 
 import android.content.Context
+import broz.tito.xrenovation.data.auth.entities.GetAccountInfoResult
 import broz.tito.xrenovation.data.auth.entities.RefreshTokenResult
 import broz.tito.xrenovation.data.auth.entities.SuccessRefreshTokenResult
 import broz.tito.xrenovation.data.sharedprefs.SharedPrefsModel
+import broz.tito.xrenovation.domain.GetAccountInfoUseCase
 import broz.tito.xrenovation.domain.RefreshTokenUseCase
 import broz.tito.xrenovation.domain.SaveAuthResponseUseCase
 import kotlinx.coroutines.Dispatchers
@@ -27,5 +29,11 @@ suspend fun refreshToken(context: Context,refreshTokenUseCase : RefreshTokenUseC
             )
         }
     }.last()
+}.await()
+}
+
+suspend fun getAccountInfo(context: Context, getAccountInfoUseCase : GetAccountInfoUseCase,sharedPrefsModel: SharedPrefsModel)
+: GetAccountInfoResult = coroutineScope { async {
+    return@async getAccountInfoUseCase(sharedPrefsModel.getIdToken(context)).last()
 }.await()
 }

@@ -70,7 +70,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         }
     }.flowOn(Dispatchers.Main)
 
-    fun searchPoint(point: Point) : Flow<SearchPointResult> = callbackFlow<SearchPointResult> {
+    fun searchPoint(point: Point) : Flow<SearchPointResult> = callbackFlow {
         trySend(PendingSearchPointResult())
         val session = searchManager.submit(point,null,SearchOptions(),object : SearchListener {
             override fun onSearchResponse(response : Response) {
@@ -90,10 +90,12 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                         Log.d(TAG, "region: $region -- province: $province district: $district")
                         Log.d(TAG, "success -- $area -- $it -- $street -- $house")
                         trySend(SuccessSearchPointResult(SearchPointAddress(province,area,it,street,house)))
+                        close()
                     }
                     else {
                         Log.d(TAG, "failure -- search_point -- $it")
                         FailureSearchPointResult(CITY_NOT_FOUND)
+                        close()
                     }
                 }
             }
@@ -101,6 +103,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
             override fun onSearchError(error : Error) {
                 trySend(FailureSearchPointResult(error.toString()))
                 Log.d(TAG, "failure -- search_point")
+                close()
             }
         }
         )

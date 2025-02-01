@@ -129,7 +129,7 @@
                     android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     android:textSize="11sp"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     app:cpb_colorIndicator="@color/cyan"
                     app:cpb_cornerRadius="25dp"
                     app:cpb_selectorIdle="@drawable/cpb_selector"

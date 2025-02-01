@@ -80,6 +80,7 @@
     <string name="add_url">Add URL</string>
     <string name="cancel">Cancel</string>
     <string name="no_address_selected">Enter address</string>
+    <string name="incorrect_address">Incorrect address</string>
     <string name="no_floors_entered">Enter the number of floors</string>
     <string name="no_flats_entered">Enter the number of flats</string>
     <string name="no_year_entered">Enter the construction year</string>

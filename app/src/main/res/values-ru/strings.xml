@@ -80,6 +80,7 @@
     <string name="add_url">Добавить ссылку</string>
     <string name="cancel">Отмена</string>
     <string name="no_address_selected">Введите адрес</string>
+    <string name="incorrect_address">Неправильный адрес</string>
     <string name="no_floors_entered">Введите количество этажей</string>
     <string name="no_flats_entered">Введите количество квартир</string>
     <string name="no_year_entered">Введите год постройки</string>

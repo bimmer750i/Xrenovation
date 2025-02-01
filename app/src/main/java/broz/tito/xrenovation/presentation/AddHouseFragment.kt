@@ -1,6 +1,7 @@
 package broz.tito.xrenovation.presentation
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -34,6 +35,8 @@ import broz.tito.xrenovation.presentation.adapters.SuggestArrayAdapter
 import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
+import broz.tito.xrenovation.presentation.models.ADDRESS_NOT_MOSCOW
+import broz.tito.xrenovation.presentation.models.ADDRESS_NO_HOUSE
 import broz.tito.xrenovation.presentation.models.AddHouseViewModel
 import broz.tito.xrenovation.presentation.models.AddHouseViewModelFactory
 import com.google.android.material.chip.Chip
@@ -60,6 +63,8 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
      private var floors : String? = null
 
      private var isChecked : Boolean = false
+
+     private var houseAddress = ""
 
      private lateinit var recyclerViewAdapter : PhotoRecyclerViewAdapter
 
@@ -179,10 +184,19 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             suggestArrayAdapter.items.get(position).center?.let {
                 housePoint = it
             }
+            houseAddress = suggestArrayAdapter.items.get(position).title.text
         }
         binding.buttonAddHouse.setOnClickListener {
             if (!binding.buttonAddHouse.isIndeterminateProgressMode) {
-                addHouse()
+                addHouse(requireContext(),housePoint,photoList,"house",House(
+                    LatLon(housePoint?.latitude ?: 0.0,housePoint?.longitude ?: 0.0),
+                    binding.autoCompleteTextView.text.toString(),
+                    binding.editTextNumberOfFloors.text.toString(),
+                    binding.editTextNumberOfFlats.text.toString(),
+                    binding.editTextConstructionYear.text.toString(),
+                    binding.editTextDescription.text.toString(),
+                    ArrayList(),urlList
+                ), HousePoint("",LatLon(housePoint?.latitude ?: 0.0,housePoint?.longitude  ?: 0.0)))
             }
         }
         viewModel.suggestAddressResult.observe(viewLifecycleOwner) {
@@ -202,174 +216,45 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                 }
             }
         }
-        viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is PendingGetAccountInfoResult -> {
-                    showProgressBar()
-                    disableViews()
-                }
-                is SuccessGetAccountInfoResult -> {
-                    it.user.emailVerified?.let {verified ->
-                        if (verified) {
-                            viewModel.searchPoint(housePoint)
-                        }
-                        else {
-                            enableViews()
-                            hideProgressBar()
-                            showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
-                        }
-                    }
-                }
-                is FailureGetAccountInfoResult -> {
-                    viewModel.resetState()
-                    when (it.errorMessage) {
-                        INVALID_ID_TOKEN -> {
-                            viewModel.refreshToken(requireContext())
-                        }
-                        USER_NOT_FOUND -> {
-                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
-                            hideProgressBar()
-                            enableViews()
-                        }
-                        USER_DISABLED -> {
-                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                            hideProgressBar()
-                            enableViews()
-                        }
-                        else -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                            hideProgressBar()
-                            enableViews()
-                        }
-                    }
-                }
-            }
-        }
-        viewModel.refreshTokenResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is SuccessRefreshTokenResult -> {
-                    viewModel.getAccountInfo(requireContext())
-                }
-                is FailureRefreshTokenResult -> {
-                    enableViews()
-                    hideProgressBar()
-                    viewModel.resetState()
-                    when(it.errorMessage) {
-                        TOKEN_EXPIRED -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
-                        }
-                        USER_DISABLED -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                        }
-                        USER_NOT_FOUND -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                        }
-                        MISSING_REFRESH_TOKEN -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
-                        }
-                        else -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                        }
-                    }
-                }
-            }
-        }
-        viewModel.searchPointResult.observe(viewLifecycleOwner) {
-            when (it) {
-                is PendingSearchPointResult -> {
 
-                }
-                is SuccessSearchPointResult -> {
-                    if (it.searchPointAddress.isMoscow(requireContext()) && !it.searchPointAddress.house.isNullOrEmpty()) {
-                        viewModel.loadPhotosToFireBase(requireContext(),UUID.randomUUID().toString().take(10),photoList)
-                    }
-                    else if (!it.searchPointAddress.isMoscow(requireContext())) {
-                        enableViews()
-                        hideProgressBar()
-                        showSnackBarLong(this,binding.root,getString(R.string.not_moscow))
-                    }
-                    else if (it.searchPointAddress.house.isNullOrEmpty()) {
-                        enableViews()
-                        hideProgressBar()
-                        showSnackBarLong(this,binding.root,getString(R.string.no_house_in_address))
-                    }
-                }
-                is FailureSearchPointResult -> {
-                    viewModel.resetState()
-                    enableViews()
-                    hideProgressBar()
-                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                }
-            }
-        }
-        viewModel.loadPhotosResult.observe(viewLifecycleOwner) {
-            when (it)  {
-                is PendingLoadPhotosResult -> {
-
-                }
-                is SuccessLoadPhotosResult -> {
-                    viewModel.addHouse(requireContext(),"house", House(
-                        LatLon(housePoint?.latitude ?: 0.0,housePoint?.longitude ?: 0.0),
-                    binding.autoCompleteTextView.text.toString(),
-                    binding.editTextNumberOfFloors.text.toString(),
-                    binding.editTextNumberOfFlats.text.toString(),
-                    binding.editTextConstructionYear.text.toString(),
-                    binding.editTextDescription.text.toString(),
-                    it.urlList,urlList
-                    )
-                    )
-                    Log.d(TAG, "successLoadPhotosResult: ${it.urlList}")
-                }
-                is FailureLoadPhotosResult -> {
-                    viewModel.resetState()
-                    enableViews()
-                    hideProgressBar()
-                    if (it.errorMessage == POST_TIMEOUT) {
-                        showSnackBarShort(this,binding.root,getString(R.string.post_timeout_house))
-                    }
-                    else {
-                        showSnackBarShort(this,binding.root,getString(R.string.failed_to_upload_photos))
-                    }
-                }
-
-            }
-        }
         viewModel.addHouseResult.observe(viewLifecycleOwner) { addHouseResult ->
             when (addHouseResult) {
                 is PendingAddHouseResult -> {
-
+                    showProgressBar()
+                    disableViews()
                 }
                 is SuccessAddHouseResult -> {
-                    addHouseResult.houseResponse.name?.let {name ->
-                        viewModel.addHousePoint(requireContext(),name,HousePoint(name,LatLon(housePoint?.latitude ?: 0.0,housePoint?.longitude  ?: 0.0)))
-                    }
+                    showSnackBarShort(this,binding.root,getString(R.string.house_added))
+                    viewModel.resetState()
+                    enableViews()
+                    hideProgressBar()
                 }
                 is FailureAddHouseResult -> {
                     viewModel.resetState()
                     enableViews()
                     hideProgressBar()
-                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                }
-            }
-        }
-        viewModel.addHousePointResult.observe(viewLifecycleOwner) { addHousePointResult ->
-            when (addHousePointResult) {
-                is PendingAddHousePointResult -> {
+                    when (addHouseResult.errorMessage) {
+                        TOKEN_EXPIRED -> {
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
+                        }
+                        USER_DISABLED -> {
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                        }
+                        USER_NOT_FOUND -> {
+                            (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                            showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                        }
+                        MISSING_REFRESH_TOKEN -> showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
+                        POST_TIMEOUT -> showSnackBarShort(this,binding.root,getString(R.string.post_timeout_house))
+                        EMAIL_NOT_VERIFIED -> showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
+                        ADDRESS_NO_HOUSE -> showSnackBarLong(this,binding.root,getString(R.string.no_house_in_address))
+                        ADDRESS_NOT_MOSCOW -> showSnackBarLong(this,binding.root,getString(R.string.not_moscow))
+                        NO_NETWORK -> showSnackBarLong(this,binding.root,getString(R.string.no_network_try_again))
+                        else -> showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
+                    }
 
-                }
-                is SuccessAddHousePointResult -> {
-                    showSnackBarLong(this,binding.root,getString(R.string.house_added))
-                    viewModel.resetState()
-                    enableViews()
-                    hideProgressBar()
-                }
-                is FailureAddHousePointResult -> {
-                    showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
-                    viewModel.resetState()
-                    enableViews()
-                    hideProgressBar()
                 }
             }
         }
@@ -406,27 +291,36 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
 
     override fun enableViews() {
         binding.apply {
+            autoCompleteTextView.isEnabled = true
             editTextNumberOfFlats.isEnabled = true
             editTextConstructionYear.isEnabled = true
             editTextNumberOfFloors.isEnabled = true
             editTextDescription.isEnabled = true
+            checkBoxVariableFloors.isEnabled = true
+            imageViewAddressLocation.isEnabled = true
             recyclerviewChosenPhoto.visibility = View.VISIBLE
         }
     }
 
     override fun disableViews() {
         binding.apply {
+            autoCompleteTextView.isEnabled = false
             editTextNumberOfFlats.isEnabled = false
             editTextConstructionYear.isEnabled = false
             editTextNumberOfFloors.isEnabled = false
             editTextDescription.isEnabled = false
+            checkBoxVariableFloors.isEnabled = false
+            imageViewAddressLocation.isEnabled = false
             recyclerviewChosenPhoto.visibility = View.GONE
         }
     }
 
-    private fun addHouse() {
-        if (housePoint == null) {
+    private fun addHouse(context: Context, point: Point?, list : ArrayList<String>, name : String, house: House, housePoint: HousePoint?) {
+        if (housePoint == null || binding.autoCompleteTextView.text.toString().isEmpty() ) {
             showSnackBarLong(this,binding.root,getString(R.string.no_address_selected))
+        }
+        else if (houseAddress != binding.autoCompleteTextView.text.toString()) {
+            showSnackBarLong(this,binding.root,getString(R.string.incorrect_address))
         }
         else if (binding.editTextNumberOfFloors.text.isNullOrEmpty()) {
             showSnackBarLong(this,binding.root,getString(R.string.no_floors_entered))
@@ -444,7 +338,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             showSnackBarLong(this,binding.root,getString(R.string.no_photos_selected))
         }
         else {
-            viewModel.getAccountInfo(requireContext())
+            viewModel.addHouse(context, point, list, name, house, housePoint)
         }
     }
 

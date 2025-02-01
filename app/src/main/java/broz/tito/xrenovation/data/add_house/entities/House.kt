@@ -16,7 +16,7 @@ class House(
     @SerializedName("description")
     val description : String,
     @SerializedName("photos")
-    val photos : ArrayList<String>,
+    var photos : ArrayList<String>,
     @SerializedName("links")
     val links : ArrayList<String>
 ) : java.io.Serializable {

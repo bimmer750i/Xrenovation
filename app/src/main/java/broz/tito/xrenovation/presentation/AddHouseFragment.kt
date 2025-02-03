@@ -95,11 +95,11 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             savedInstanceState.getStringArrayList(URL_lIST)?.let {
                 urlList = it
             }
-            savedInstanceState.getString(FLOORS)?.let {
-                floors = it
-            }
             savedInstanceState.getBoolean(CHECKED).let {
                 isChecked = it
+            }
+            savedInstanceState.getString(FLOORS)?.let {
+                floors = it
             }
         }
         (requireActivity().application as App).appComponent.inject(this)
@@ -122,10 +122,6 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             addChip(it)
         }
         binding.checkBoxVariableFloors.isChecked = isChecked
-        floors?.let {
-            binding.editTextNumberOfFloors.setText(it)
-            floors = null
-        }
         binding.recyclerviewChosenPhoto.adapter = recyclerViewAdapter
         binding.recyclerviewChosenPhoto.layoutManager = LinearLayoutManager(requireContext(),LinearLayoutManager.HORIZONTAL,false)
         val itemTouchHelperCallback = PhotoItemTouchHelperCallback()
@@ -155,19 +151,19 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             if (housePoint != null) {
                 val directions = AddHouseFragmentDirections.actionAddHouseFragmentToFindHouseOnMapFragment(LatLon((housePoint?.latitude ?: 0.0),(housePoint?.longitude ?: 0.0)))
                 findNavController().navigate(directions)
+
             }
             else {
                 findNavController().navigate(R.id.action_addHouseFragment_to_findHouseOnMapFragment)
+                this.onDestroy()
             }
         }
         binding.checkBoxVariableFloors.setOnCheckedChangeListener { button, isChecked ->
             if (isChecked) {
-                binding.editTextNumberOfFloors.text.clear()
                 binding.editTextNumberOfFloors.inputType = InputType.TYPE_CLASS_PHONE
                 binding.editTextNumberOfFloors.keyListener = DigitsKeyListener.getInstance("0123456789-")
             }
             else {
-                binding.editTextNumberOfFloors.text.clear()
                 binding.editTextNumberOfFloors.inputType = InputType.TYPE_CLASS_NUMBER
             }
         }
@@ -181,10 +177,11 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         binding.autoCompleteTextView.setAdapter(suggestArrayAdapter)
         binding.autoCompleteTextView.threshold = 1
         binding.autoCompleteTextView.setOnItemClickListener { adapterView, view, position, id ->
-            suggestArrayAdapter.items.get(position).center?.let {
+            val suggestItem = suggestArrayAdapter.items[position]
+            suggestItem.center?.let {
                 housePoint = it
             }
-            houseAddress = suggestArrayAdapter.items.get(position).title.text
+            houseAddress = suggestItem.title.text
         }
         binding.buttonAddHouse.setOnClickListener {
             if (!binding.buttonAddHouse.isIndeterminateProgressMode) {
@@ -267,12 +264,16 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
                     (bundle.getSerializable(FindHouseOnMapFragment.ADDRESS) as SearchPointAddress).toShortAddress()
                 }
                 binding.autoCompleteTextView.setText(text,false)
+                text?.let {
+                    houseAddress = it
+                }
                 val latitude = bundle.getDouble(FindHouseOnMapFragment.LATITUDE)
                 val longitude = bundle.getDouble(FindHouseOnMapFragment.LONGITUDE)
                 housePoint = Point(latitude,longitude)
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -320,6 +321,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             showSnackBarLong(this,binding.root,getString(R.string.no_address_selected))
         }
         else if (houseAddress != binding.autoCompleteTextView.text.toString()) {
+            Log.d(TAG, "addHouse: houseAddress -- $houseAddress autoCompleteText -- ${binding.autoCompleteTextView.text.toString()}")
             showSnackBarLong(this,binding.root,getString(R.string.incorrect_address))
         }
         else if (binding.editTextNumberOfFloors.text.isNullOrEmpty()) {

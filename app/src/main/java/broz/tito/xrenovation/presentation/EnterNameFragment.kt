@@ -73,6 +73,7 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                     hideProgressBar()
                     enableViews()
                     findNavController().navigate(R.id.action_enterNameFragment_to_accountInfoFragment)
+
                 }
 
                 is FailureSetAccountInfoResult -> {

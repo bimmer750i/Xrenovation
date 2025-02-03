@@ -96,10 +96,20 @@ class AccountInfoViewModel @Inject constructor(val getAccountInfoUseCase: GetAcc
         }
     }
 
-    fun resetGetAccountInfoViewModelState() {
-        _uploadProfilePictureResult.postValue(UploadProfilePictureResult())
-        _setAccountInfoResult.postValue(SetAccountInfoResult())
+    fun resetVerifyEmailState() {
         _verifyEmailResult.postValue(VerifyEmailResult())
+    }
+
+    fun resetGetAccountInfoState() {
+        _getAccountInfoResult.postValue(GetAccountInfoResult())
+    }
+
+    fun resetUploadProfilePictureResult() {
+        _uploadProfilePictureResult.postValue(UploadProfilePictureResult())
+    }
+
+    fun resetSetAccountInfoResult() {
+        _setAccountInfoResult.postValue(SetAccountInfoResult())
     }
 
 }

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 import javax.inject.Inject
 
-class UploadProfilePictureUseCase @Inject constructor(val emailRepository: broz.tito.xrenovation.domain.EmailRepository, val sharedPrefsModel: SharedPrefsModel) {
+class UploadProfilePictureUseCase @Inject constructor(val emailRepository: EmailRepository, val sharedPrefsModel: SharedPrefsModel) {
 
     suspend operator fun invoke(context: Context,file: File) : Flow<UploadProfilePictureResult> {
         return emailRepository.uploadProfilePicture(sharedPrefsModel.getLocalId(context),file)

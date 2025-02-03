@@ -88,6 +88,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_exception))
                         }
                     }
+                    viewModel.resetViewModelState()
                 }
             }
         }

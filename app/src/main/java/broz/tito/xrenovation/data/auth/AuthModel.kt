@@ -3,6 +3,7 @@ package broz.tito.xrenovation.data.auth
 import android.net.Uri
 import android.util.Log
 import broz.tito.xrenovation.data.auth.entities.*
+import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.StorageTask
@@ -199,7 +200,23 @@ class AuthModel @Inject constructor(val service: AuthService, val captchaService
         emit(result)
     }
 
-    fun uploadProfilePicture(localId : String, file : File) : Flow<UploadProfilePictureResult> = callbackFlow<UploadProfilePictureResult> {
+    /*fun getProfilePictureLink(localId: String) : Flow<GetProfilePictureLinkResult> = callbackFlow {
+        var result : GetProfilePictureLinkResult?
+        try {
+            result = PendingGetProfilePictureLinkResult()
+            trySend(result)
+            storageReference.child("$localId/avatars/avatar.jpg").downloadUrl.addOnSuccessListener { result ->
+
+            }.addOnFailureListener {
+                // Handle any errors
+            }
+        }
+        catch (e : Exception) {
+
+        }
+    }*/
+
+    fun uploadProfilePicture(localId : String, file : File) : Flow<UploadProfilePictureResult> = callbackFlow {
         var task : StorageTask<UploadTask.TaskSnapshot>? = null
         try {
             var result : UploadProfilePictureResult = PendingUploadProfilePictureResult()

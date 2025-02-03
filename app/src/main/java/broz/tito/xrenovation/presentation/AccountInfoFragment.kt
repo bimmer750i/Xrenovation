@@ -29,7 +29,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
 
     private var isLoaded = false
 
-    private var emailVerified = false
+    private var verificationEmailSent = false
 
     private lateinit var binding : FragmentAccountInfoBinding
 
@@ -90,7 +90,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                     else {
                         hideProgressBar()
                         binding.textviewHiSomeone.visibility = View.VISIBLE
-                        binding.textviewHiSomeone.text = getString(R.string.hi_someone) + it.user.displayName
+                        binding.textviewHiSomeone.text = "${getString(R.string.hi_someone)}${it.user.displayName}"
                         binding.cardviewEmailVerified.visibility = View.VISIBLE
                         binding.cardviewLogOut.visibility = View.VISIBLE
                         it.user.photoUrl?.let {url ->
@@ -115,8 +115,10 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                             }
                         }
                     }
+
                 }
                 is FailureGetAccountInfoResult -> {
+                    isLoaded = false
                     when(it.errorMessage) {
                         TOKEN_EXPIRED -> {
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
@@ -134,11 +136,16 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
                         }
+                        NO_NETWORK -> {
+                            hideProgressBar()
+                            showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
+                        }
                         else -> {
                             hideProgressBar()
                             showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.get_account_info_error))
                         }
                     }
+                    viewModel.resetGetAccountInfoState()
                 }
             }
         }
@@ -149,10 +156,12 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is SuccessUploadProfilePictureResult -> {
                     viewModel.setAccountInfo(requireContext(),null,it.url)
+                    viewModel.resetUploadProfilePictureResult()
                 }
                 is FailureUploadProfilePictureResult -> {
                     hideProgressBar()
                     showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.picture_not_uploaded))
+                    viewModel.resetUploadProfilePictureResult()
                 }
             }
         }
@@ -163,10 +172,12 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is SuccessSetAccountInfoResult -> {
                     viewModel.getAccountInfo(requireContext())
+                    viewModel.resetSetAccountInfoResult()
                 }
                 is FailureSetAccountInfoResult -> {
                     hideProgressBar()
                     showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.set_account_info_error))
+                    viewModel.resetSetAccountInfoResult()
                 }
             }
         }
@@ -174,19 +185,18 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         viewModel.verifyEmailResult.observe(viewLifecycleOwner)  {
             when (it) {
                 is PendingVerifyEmailResult-> {
-                    binding.buttonVerifyEmail.isIndeterminateProgressMode = true
-                    binding.buttonVerifyEmail.progress = 66
+                    showVerifyEmailProgressbar()
                 }
                 is SuccessVerifyEmailResult -> {
-                    binding.buttonVerifyEmail.progress = 0
-                    if (!emailVerified) {
+                    hideVerifyEmailProgressbar()
+                    if (!verificationEmailSent) {
                         showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
                     }
-                    emailVerified = true
-                    viewModel.resetGetAccountInfoViewModelState()
+                    verificationEmailSent = true
+                    viewModel.resetVerifyEmailState()
                 }
                 is FailureVerifyEmailResult -> {
-                    binding.buttonVerifyEmail.progress = 0
+                    hideVerifyEmailProgressbar()
                     when (it.errorMessage) {
                         INVALID_ID_TOKEN -> {
                             showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))
@@ -198,15 +208,17 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                             showSnackBarShort(this,binding.root,getString(R.string.sign_up_error_many_attempts))
                         }
                     }
-                    emailVerified = false
-                    viewModel.resetGetAccountInfoViewModelState()
+                    verificationEmailSent = false
+                    viewModel.resetVerifyEmailState()
                 }
             }
         }
 
         if (!isLoaded) {
-            viewModel.getAccountInfo(requireContext())
-            isLoaded = true
+            if ((requireActivity().application as App).networkStatus != NetworkStatus.NO_NETWORK) {
+                viewModel.getAccountInfo(requireContext())
+                isLoaded = true
+            }
         }
     }
 
@@ -242,7 +254,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(ACCOUNT_INFO_LOADED,isLoaded)
-        outState.putBoolean(EMAIL_VERIFIED_KEY,emailVerified)
+        outState.putBoolean(EMAIL_VERIFIED_KEY,verificationEmailSent)
     }
 
 
@@ -253,6 +265,17 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
     override fun hideProgressBar() {
         binding.progressBarAccountInfo.visibility = View.GONE
     }
+
+    private fun showVerifyEmailProgressbar() {
+        binding.buttonVerifyEmail.isIndeterminateProgressMode = true
+        binding.buttonVerifyEmail.progress = 66
+    }
+
+    private fun hideVerifyEmailProgressbar() {
+        binding.buttonVerifyEmail.isIndeterminateProgressMode = false
+        binding.buttonVerifyEmail.progress = 0
+    }
+
 
     companion object {
         const val ACCOUNT_INFO_LOADED = "ACCOUNT_INFO_LOADED"

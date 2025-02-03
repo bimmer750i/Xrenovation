@@ -8,6 +8,12 @@ import broz.tito.xrenovation.R
 import broz.tito.xrenovation.databinding.CommentItemBinding
 import broz.tito.xrenovation.presentation.entities.DisplayComment
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.signature.ObjectKey
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -39,8 +45,10 @@ class CommentsRecyclerViewAdapter : RecyclerView.Adapter<CommentsRecyclerViewAda
         val date = sdf.format(Date(displayComment.comment.timeAdded*1000))
         holder.binding.textViewTimeAdded.text = date
         Glide.with(holder.binding.root)
-            .load(displayComment.comment.photoUrl)
+            .load(Firebase.storage.reference.child("${displayComment.comment.localId}/avatars/avatar.jpg"))
             .placeholder(R.drawable.ic_launcher_foreground)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
             .into(holder.binding.imageViewUserPhoto)
         holder.binding.textViewUserName.text = displayComment.comment.displayName
         holder.binding.textViewLocalId.text = displayComment.comment.localId

@@ -12,14 +12,15 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentAccountInfoBinding
+import broz.tito.xrenovation.presentation.dialogs.showEmailNotFoundDialog
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.AccountInfoViewModel
 import broz.tito.xrenovation.presentation.models.AccountInfoViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import com.bumptech.glide.Glide
 import java.io.File
 import java.io.FileOutputStream
@@ -45,9 +46,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         if (savedInstanceState != null) {
             isLoaded = savedInstanceState.getBoolean(ACCOUNT_INFO_LOADED,false)
         }
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // FUCK YOU, STUPID NAVIGATION COMPONENT
-        }
+        requireActivity().onBackPressedDispatcher.addCallback(this) {}
         registerForActivityResult()
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,accountInfoViewModelFactory)[AccountInfoViewModel::class.java]
@@ -75,6 +74,9 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         }
         binding.cardviewLogOut.setOnClickListener {
             showDialog()
+        }
+        binding.textViewEmailNotFoundAccountInfo.setOnClickListener {
+            showEmailNotFoundDialog(requireContext())
         }
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
@@ -107,6 +109,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                             if (it) {
                                 binding.imageviewEmailVerified.setImageResource(R.drawable.baseline_verified_user_24)
                                 binding.textViewIsEmailVerified.text = getString(R.string.email_verified)
+                                hideEmailNotFoundText()
                             }
                             else {
                                 binding.imageviewEmailVerified.setImageResource(R.drawable.baseline_cancel_24)
@@ -119,22 +122,23 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is FailureGetAccountInfoResult -> {
                     isLoaded = false
+                    hideEmailNotFoundText()
                     when(it.errorMessage) {
                         TOKEN_EXPIRED -> {
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            safeNavigate(this,R.id.accountInfoFragment,R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         MISSING_REFRESH_TOKEN -> {
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            safeNavigate(this,R.id.accountInfoFragment,R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         USER_NOT_FOUND -> {
                             hideProgressBar()
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            safeNavigate(this,R.id.accountInfoFragment,R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         USER_DISABLED -> {
                             hideProgressBar()
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                            findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                            safeNavigate(this,R.id.accountInfoFragment,R.id.action_accountInfoFragment_to_accountFragment)
                         }
                         NO_NETWORK -> {
                             hideProgressBar()
@@ -188,9 +192,12 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                     showVerifyEmailProgressbar()
                 }
                 is SuccessVerifyEmailResult -> {
+                    Log.d("AccountInfoFragment", "SuccessVerifyEmailResult")
                     hideVerifyEmailProgressbar()
                     if (!verificationEmailSent) {
                         showSnackBarShort(this,binding.root,getString(R.string.verification_email_sent))
+                        Log.d("AccountInfoFragment", "Email not found text shown")
+                        showEmailNotFoundText()
                     }
                     verificationEmailSent = true
                     viewModel.resetVerifyEmailState()
@@ -199,7 +206,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                     hideVerifyEmailProgressbar()
                     when (it.errorMessage) {
                         INVALID_ID_TOKEN -> {
-                            showSnackBarShort(this,binding.root,getString(R.string.invalid_id_token))
+                            showSnackBarShort(this,binding.root,getString(R.string.sign_in_with_email))
                         }
                         USER_NOT_FOUND -> {
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found))
@@ -236,13 +243,13 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         }
     }
 
-    fun showDialog() {
+    private fun showDialog() {
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.dialog_log_out)
             .setPositiveButton(R.string.yes) { dialogInterface, num ->
                 viewModel.logOut(requireContext())
                 (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
-                findNavController().navigate(R.id.action_accountInfoFragment_to_accountFragment)
+                safeNavigate(this,R.id.accountInfoFragment,R.id.action_accountInfoFragment_to_accountFragment)
             }
             .setNegativeButton(R.string.no) { dialogInterface, num ->
                 dialogInterface.cancel()
@@ -269,11 +276,21 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
     private fun showVerifyEmailProgressbar() {
         binding.buttonVerifyEmail.isIndeterminateProgressMode = true
         binding.buttonVerifyEmail.progress = 66
+        hideEmailNotFoundText()
     }
 
     private fun hideVerifyEmailProgressbar() {
         binding.buttonVerifyEmail.isIndeterminateProgressMode = false
         binding.buttonVerifyEmail.progress = 0
+
+    }
+
+    private fun showEmailNotFoundText() {
+        binding.textViewEmailNotFoundAccountInfo.visibility = View.VISIBLE
+    }
+
+    private fun hideEmailNotFoundText() {
+        binding.textViewEmailNotFoundAccountInfo.visibility = View.GONE
     }
 
 

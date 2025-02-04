@@ -11,6 +11,7 @@ import broz.tito.xrenovation.R
 import broz.tito.xrenovation.databinding.FragmentWelcomeBinding
 import broz.tito.xrenovation.presentation.models.WelcomeFragmentViewModel
 import broz.tito.xrenovation.presentation.models.WelcomeFragmentViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import javax.inject.Inject
 
 
@@ -39,7 +40,7 @@ class WelcomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonContinueToXrenovation.setOnClickListener {
             viewModel.setFirstStartCompleted(requireContext())
-            findNavController().navigate(R.id.action_welcomeFragment_to_mainFragment)
+            safeNavigate(this,R.id.welcomeFragment,R.id.action_welcomeFragment_to_mainFragment)
         }
     }
 

@@ -15,6 +15,7 @@ import broz.tito.xrenovation.data.auth.entities.SuccessRefreshTokenResult
 import broz.tito.xrenovation.databinding.FragmentStartBinding
 import broz.tito.xrenovation.presentation.models.StartFragmentViewModel
 import broz.tito.xrenovation.presentation.models.StartFragmentViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,14 +48,14 @@ class StartFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         if (viewModel.isFirstStart(requireContext())) {
-            findNavController().navigate(R.id.action_startFragment_to_welcomeFragment)
+            safeNavigate(this,R.id.startFragment,R.id.action_startFragment_to_welcomeFragment)
         }
         viewModel.refreshTokenResult.observe(viewLifecycleOwner) {
             when(it) {
                 is SuccessRefreshTokenResult -> {
                     (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_IN
                     (requireActivity().application as App).networkStatus = NetworkStatus.NETWORK_OK
-                    findNavController().navigate(R.id.action_startFragment_to_mainFragment)
+                    safeNavigate(this,R.id.startFragment,R.id.action_startFragment_to_mainFragment)
                 }
                 is FailureRefreshTokenResult -> {
                     when(it.errorMessage) {
@@ -71,7 +72,7 @@ class StartFragment : Fragment() {
                             (requireActivity().application as App).networkStatus = NetworkStatus.NO_NETWORK
                         }
                     }
-                    findNavController().navigate(R.id.action_startFragment_to_mainFragment)
+                    safeNavigate(this,R.id.startFragment,R.id.action_startFragment_to_mainFragment)
                 }
             }
         }

@@ -14,6 +14,9 @@
     <string name="sign_up_error_email_exists">This email is already being used</string>
     <string name="sign_up_error_many_attempts">Too many attempts, try again later</string>
     <string name="verification_email_sent">Verification email has been sent</string>
+    <string name="email_not_found">Can\'t find the email?</string>
+    <string name="email_not_found_text">1) Make sure that the correct email address was entered during registration. If an incorrect email address was specified during registration, create an account with a new email address.\n2) Check the \"Spam\" folder on your mail, it is likely that the email may end up there.</string>
+    <string name="ok">OK</string>
     <string name="incorrect_email">Incorrect Email</string>
     <string name="different_passwords">The passwords are different</string>
     <string name="weak_password">The password must be at least 6 characters long</string>

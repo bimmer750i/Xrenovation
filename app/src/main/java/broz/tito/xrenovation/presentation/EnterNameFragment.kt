@@ -17,6 +17,7 @@ import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.EnterNameViewModel
 import broz.tito.xrenovation.presentation.models.EnterNameViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import javax.inject.Inject
 
 
@@ -34,11 +35,8 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (requireActivity().application as App).appComponent.inject(this)
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // FUCK YOU, STUPID NAVIGATION COMPONENT X2
-        }
-        enterNameViewModel =
-            ViewModelProvider(this, enterNameViewModelFactory)[EnterNameViewModel::class.java]
+        requireActivity().onBackPressedDispatcher.addCallback(this) {}
+        enterNameViewModel = ViewModelProvider(this, enterNameViewModelFactory)[EnterNameViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -72,7 +70,7 @@ class EnterNameFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                     Log.d(TAG, "Success -- ${it.response.displayName} -- ${it.response.email}")
                     hideProgressBar()
                     enableViews()
-                    findNavController().navigate(R.id.action_enterNameFragment_to_accountInfoFragment)
+                    safeNavigate(this,R.id.enterNameFragment,R.id.action_enterNameFragment_to_accountInfoFragment)
 
                 }
 

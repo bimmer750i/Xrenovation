@@ -11,6 +11,7 @@ import broz.tito.xrenovation.data.auth.entities.FailureSendPasswordResetEmailRes
 import broz.tito.xrenovation.data.auth.entities.PendingSendPasswordResetEmailResult
 import broz.tito.xrenovation.data.auth.entities.SuccessSendPasswordResetEmailResult
 import broz.tito.xrenovation.databinding.FragmentEnterEmailBinding
+import broz.tito.xrenovation.presentation.dialogs.showEmailNotFoundDialog
 import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
@@ -49,6 +50,9 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable
                 sendPasswordResetEmail()
             }
         }
+        binding.textViewEmailNotFound.setOnClickListener {
+            showEmailNotFoundDialog(requireContext())
+        }
         viewModel.sendPasswordResetEmailResult.observe(viewLifecycleOwner) {
             when (it) {
                 is PendingSendPasswordResetEmailResult -> {
@@ -60,6 +64,7 @@ class EnterEmailFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable
                     hideProgressBar()
                     enableViews()
                     showSnackBarShort(this,binding.enterEmailFragmentLayout,getString(R.string.password_reset_email_sent))
+                    binding.textViewEmailNotFound.visibility = View.VISIBLE
                 }
                 is FailureSendPasswordResetEmailResult -> {
                     viewModel.resetEnterEmailViewModel()

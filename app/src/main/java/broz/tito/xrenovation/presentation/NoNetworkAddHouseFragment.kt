@@ -16,9 +16,7 @@ class NoNetworkAddHouseFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // FUCK YOU, STUPID NAVIGATION COMPONENT X2
-        }
+        requireActivity().onBackPressedDispatcher.addCallback(this) {}
     }
 
     override fun onCreateView(

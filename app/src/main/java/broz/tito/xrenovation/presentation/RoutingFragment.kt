@@ -10,6 +10,7 @@ import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.LoggedStatus
 import broz.tito.xrenovation.data.auth.entities.NetworkStatus
 import broz.tito.xrenovation.databinding.FragmentRoutingBinding
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 
 
 class RoutingFragment : Fragment() {
@@ -27,19 +28,20 @@ class RoutingFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         if ((requireActivity().application as App).networkStatus == NetworkStatus.NO_NETWORK) {
-            findNavController().navigate(R.id.action_routingFragment_to_noNetworkAccountFragment)
+            safeNavigate(this,R.id.routingFragment,R.id.action_routingFragment_to_noNetworkAccountFragment)
         }
         else if ((requireActivity().application as App).loggedStatus == LoggedStatus.UNDEFINED) {
-            findNavController().navigate(R.id.action_routingFragment_to_accountInfoFragment)
+            safeNavigate(this,R.id.routingFragment,R.id.action_routingFragment_to_accountInfoFragment)
         }
         else if ((requireActivity().application as App).loggedStatus == LoggedStatus.LOGGED_IN) {
-            findNavController().navigate(R.id.action_routingFragment_to_accountInfoFragment)
+            safeNavigate(this,R.id.routingFragment,R.id.action_routingFragment_to_accountInfoFragment)
         }
         else if ((requireActivity().application as App).loggedStatus == LoggedStatus.LOGGED_OUT) {
-            findNavController().navigate(R.id.action_routingFragment_to_accountFragment)
+            safeNavigate(this,R.id.routingFragment,R.id.action_routingFragment_to_accountFragment)
         }
         else {
-            findNavController().navigate(R.id.action_routingFragment_to_accountFragment)
+            safeNavigate(this,R.id.routingFragment,R.id.action_routingFragment_to_accountFragment)
+
         }
     }
 

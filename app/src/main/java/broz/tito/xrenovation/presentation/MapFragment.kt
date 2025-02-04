@@ -13,7 +13,6 @@ import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.add_house.entities.House
@@ -25,6 +24,7 @@ import broz.tito.xrenovation.databinding.FragmentMapBinding
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.models.MapFragmentViewModel
 import broz.tito.xrenovation.presentation.models.MapFragmentViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraListener
@@ -75,7 +75,7 @@ class MapFragment : Fragment() {
         recyclerViewAdapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.DISPLAY_PHOTO_VIEWHOLDER) {
             if (!house.isEmpty()) {
                 val directions = MapFragmentDirections.actionMapFragment2ToHouseFragment2(house,houseId)
-                findNavController().navigate(directions)
+                safeNavigate(this,R.id.mapFragment2,directions)
             }
         }
     }
@@ -90,11 +90,6 @@ class MapFragment : Fragment() {
             val house = data.getHouse(HOUSE)
             showBottomView(house.photos,house.address)
         }
-        /*if (viewModel.getHouseResult.value is SuccessGetHouseResult) {
-            val house = (viewModel.getHouseResult.value as SuccessGetHouseResult).house
-            val houseAddress = house.address
-            showBottomView(house.photos,houseAddress)
-        }*/
         binding.mapview.mapWindow.map.addCameraListener(cameraListener)
         viewModel.getPointResult.observe(viewLifecycleOwner, Observer {
             when (it) {

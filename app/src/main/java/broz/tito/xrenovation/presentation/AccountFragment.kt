@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.BuildConfig
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
@@ -17,6 +16,7 @@ import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignUpByEmailViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import javax.inject.Inject
 
 class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
@@ -32,9 +32,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // FUCK YOU, STUPID NAVIGATION COMPONENT X2
-        }
+        requireActivity().onBackPressedDispatcher.addCallback(this) {}
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,signUpByEmailViewModelFactory)[SignUpByEmailViewModel::class.java]
     }
@@ -50,7 +48,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
             }
         }
         binding.textViewAlreadySignedUp.setOnClickListener {
-            findNavController().navigate(R.id.action_accountFragment_to_signInFragment)
+            safeNavigate(this,R.id.accountFragment,R.id.action_accountFragment_to_signInFragment)
         }
         parentFragmentManager.setFragmentResultListener(CaptchaFragment.CAPTCHA_TOKEN_CODE,this) { result,data ->
             val token = data.getString(CaptchaFragment.CAPTCHA_TOKEN_VALUE,"")
@@ -68,7 +66,7 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
                 is SuccessSignUpByEmailResult -> {
                     hideProgressBar()
                     enableViews()
-                    findNavController().navigate(R.id.action_accountFragment_to_enterNameFragment)
+                    safeNavigate(this,R.id.accountFragment,R.id.action_accountFragment_to_enterNameFragment)
                 }
                 is FailureSignUpByEmailResult -> {
                     showTextView()
@@ -125,7 +123,8 @@ class AccountFragment : Fragment(), ProgressBarAble, SnackBarAble, Disablable {
         viewModel.resetViewModelState()
         if (binding.editTextEmailSignUp.text.toString().checkIfEmailCorrect() && checkIfPasswordsAreSame() && isPasswordStrong()) {
             hideTextView()
-            findNavController().navigate(R.id.action_accountFragment_to_captchaFragment2)
+            safeNavigate(this,R.id.accountFragment,R.id.action_accountFragment_to_captchaFragment2)
+
         }
         else if (binding.editTextEmailSignUp.text.isNullOrEmpty()) {
             showSnackBarShort(this,binding.root,getString(R.string.email_is_empty))

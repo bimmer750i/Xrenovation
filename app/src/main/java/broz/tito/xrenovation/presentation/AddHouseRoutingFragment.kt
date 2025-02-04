@@ -10,15 +10,12 @@ import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.LoggedStatus
 import broz.tito.xrenovation.data.auth.entities.NetworkStatus
 import broz.tito.xrenovation.databinding.FragmentAddHouseRoutingBinding
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 
 
 class AddHouseRoutingFragment : Fragment() {
 
     private lateinit var binding : FragmentAddHouseRoutingBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,19 +28,10 @@ class AddHouseRoutingFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         if ((requireActivity().application as App).networkStatus == NetworkStatus.NO_NETWORK) {
-            findNavController().navigate(R.id.action_addHouseRoutingFragment_to_noNetworkAddHouseFragmentFragment)
-        }
-        else if ((requireActivity().application as App).loggedStatus == LoggedStatus.UNDEFINED) {
-            findNavController().navigate(R.id.action_addHouseRoutingFragment_to_addHouseFragment)
-        }
-        else if ((requireActivity().application as App).loggedStatus == LoggedStatus.LOGGED_IN) {
-            findNavController().navigate(R.id.action_addHouseRoutingFragment_to_addHouseFragment)
-        }
-        else if ((requireActivity().application as App).loggedStatus == LoggedStatus.LOGGED_OUT) {
-            findNavController().navigate(R.id.action_addHouseRoutingFragment_to_addHouseFragment)
+            safeNavigate(this,R.id.addHouseRoutingFragment,R.id.action_addHouseRoutingFragment_to_noNetworkAddHouseFragmentFragment)
         }
         else {
-            //findNavController().navigate(R.id.action_routingFragment_to_accountFragment)
+            safeNavigate(this,R.id.addHouseRoutingFragment,R.id.action_addHouseRoutingFragment_to_addHouseFragment)
         }
     }
 

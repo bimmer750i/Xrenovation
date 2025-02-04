@@ -14,6 +14,9 @@
     <string name="sign_up_error_email_exists">Этот Email уже зарегистрирован</string>
     <string name="sign_up_error_many_attempts">Слишком много попыток, попробуйте позже</string>
     <string name="verification_email_sent">Отправлен Email для подтверждения</string>
+    <string name="email_not_found">Не удается найти email?</string>
+    <string name="email_not_found_text">1) Проверьте, что при регистрации был введён верный email. Если при регистрации был указан неправильный email, создайте аккаунт с новым email.\n2) Проверьте папку \"Спам\" на Вашей почте, вероятно, что email может быть там.</string>
+    <string name="ok">ОК</string>
     <string name="incorrect_email">Неправильный формат Email</string>
     <string name="different_passwords">Пароли не совпадают</string>
     <string name="weak_password">Минимальная длина пароля - 6 символов</string>

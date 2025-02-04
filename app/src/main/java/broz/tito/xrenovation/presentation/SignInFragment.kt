@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentSignInBinding
@@ -15,6 +14,7 @@ import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.SignInByEmailViewModel
 import broz.tito.xrenovation.presentation.models.SignInByEmailViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import javax.inject.Inject
 
 class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
@@ -51,7 +51,7 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
             }
         }
         binding.textviewForgotPassword.setOnClickListener {
-            findNavController().navigate(R.id.action_signInFragment_to_enterEmailFragment)
+            safeNavigate(this,R.id.signInFragment,R.id.action_signInFragment_to_enterEmailFragment)
         }
         viewModel.signInResult.observe(viewLifecycleOwner) {
             when (it) {
@@ -65,7 +65,7 @@ class SignInFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
                     hideProgressBar()
                     enableViews()
                     viewModel.resetState()
-                    findNavController().navigate(R.id.action_signInFragment_to_accountInfoFragment)
+                    safeNavigate(this,R.id.signInFragment,R.id.action_signInFragment_to_accountInfoFragment)
                 }
                 is FailureSignInByEmailResult -> {
                     binding.textviewForgotPassword.visibility = View.VISIBLE

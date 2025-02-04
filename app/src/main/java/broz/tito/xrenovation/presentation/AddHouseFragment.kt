@@ -40,6 +40,7 @@ import broz.tito.xrenovation.presentation.models.ADDRESS_NOT_MOSCOW
 import broz.tito.xrenovation.presentation.models.ADDRESS_NO_HOUSE
 import broz.tito.xrenovation.presentation.models.AddHouseViewModel
 import broz.tito.xrenovation.presentation.models.AddHouseViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import com.google.android.material.chip.Chip
 import com.yandex.mapkit.geometry.Point
 import java.io.File
@@ -149,11 +150,11 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         binding.imageViewAddressLocation.setOnClickListener {
             if (housePoint != null) {
                 val directions = AddHouseFragmentDirections.actionAddHouseFragmentToFindHouseOnMapFragment(LatLon((housePoint?.latitude ?: 0.0),(housePoint?.longitude ?: 0.0)))
-                findNavController().navigate(directions)
+                safeNavigate(this,R.id.addHouseFragment,directions)
 
             }
             else {
-                findNavController().navigate(R.id.action_addHouseFragment_to_findHouseOnMapFragment)
+                safeNavigate(this,R.id.addHouseFragment,R.id.action_addHouseFragment_to_findHouseOnMapFragment)
             }
         }
         binding.checkBoxVariableFloors.setOnCheckedChangeListener { button, isChecked ->

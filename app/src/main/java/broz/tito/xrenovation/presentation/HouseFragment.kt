@@ -13,7 +13,6 @@ import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
@@ -29,6 +28,7 @@ import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.HouseFragmentViewModel
 import broz.tito.xrenovation.presentation.models.HouseFragmentViewModelFactory
+import broz.tito.xrenovation.presentation.safe_navigation.safeNavigate
 import com.google.android.material.chip.Chip
 import javax.inject.Inject
 
@@ -122,9 +122,9 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             val popupMenu = PopupMenu(requireContext(),binding.imageViewSuggestHouseCorrection)
             popupMenu.menuInflater.inflate(R.menu.house_fragment_menu,popupMenu.menu)
             popupMenu.setOnMenuItemClickListener {
-                    val directions = HouseFragmentDirections.actionHouseFragmentToHouseCorrectionFragment(houseId)
                 viewModel.resetCommentState()
-                    findNavController().navigate(directions)
+                val directions = HouseFragmentDirections.actionHouseFragmentToHouseCorrectionFragment(houseId)
+                safeNavigate(this,R.id.houseFragment,directions)
                 true }
             popupMenu.show()
         }

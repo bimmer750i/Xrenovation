@@ -17,6 +17,7 @@ import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.forEach
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -104,9 +105,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         }
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,addHouseViewModelFactory)[AddHouseViewModel::class.java]
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // FUCK YOU, STUPID NAVIGATION COMPONENT X2
-        }
+        requireActivity().onBackPressedDispatcher.addCallback(this) {}
         recyclerViewAdapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.ADD_PHOTO_VIEWHOLDER,{})
         recyclerViewAdapter.list = photoList
         registerForActivityResult()
@@ -155,7 +154,6 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             }
             else {
                 findNavController().navigate(R.id.action_addHouseFragment_to_findHouseOnMapFragment)
-                this.onDestroy()
             }
         }
         binding.checkBoxVariableFloors.setOnCheckedChangeListener { button, isChecked ->
@@ -217,6 +215,7 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         viewModel.addHouseResult.observe(viewLifecycleOwner) { addHouseResult ->
             when (addHouseResult) {
                 is PendingAddHouseResult -> {
+                    hideProgressBar()
                     showProgressBar()
                     disableViews()
                 }
@@ -274,12 +273,6 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
         }
     }
 
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "AddHouseFragment --- destroyed !!!")
-    }
-
     override fun showProgressBar() {
         binding.buttonAddHouse.isIndeterminateProgressMode = true
         binding.buttonAddHouse.progress = 66
@@ -299,6 +292,9 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             editTextDescription.isEnabled = true
             checkBoxVariableFloors.isEnabled = true
             imageViewAddressLocation.isEnabled = true
+            chipGroupLinks.forEach {
+                it.isEnabled = true
+            }
             recyclerviewChosenPhoto.visibility = View.VISIBLE
         }
     }
@@ -312,6 +308,9 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             editTextDescription.isEnabled = false
             checkBoxVariableFloors.isEnabled = false
             imageViewAddressLocation.isEnabled = false
+            chipGroupLinks.forEach {
+                it.isEnabled = false
+            }
             recyclerviewChosenPhoto.visibility = View.GONE
         }
     }

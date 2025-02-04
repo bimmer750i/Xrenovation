@@ -46,7 +46,7 @@ class CommentsRecyclerViewAdapter : RecyclerView.Adapter<CommentsRecyclerViewAda
         holder.binding.textViewTimeAdded.text = date
         Glide.with(holder.binding.root)
             .load(Firebase.storage.reference.child("${displayComment.comment.localId}/avatars/avatar.jpg"))
-            .placeholder(R.drawable.ic_launcher_foreground)
+            .placeholder(R.drawable.baseline_person_24)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .skipMemoryCache(true)
             .into(holder.binding.imageViewUserPhoto)

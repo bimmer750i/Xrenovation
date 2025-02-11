@@ -82,47 +82,33 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablab
                     viewModel.resetModel()
                 }
                 is FailureAddHouseCorrectionResult -> {
+                    hideProgressBar()
+                    enableViews()
                     when (it.errorMessage) {
                         EMAIL_NOT_VERIFIED -> {
                             showSnackBarShort(this,binding.root,getString(R.string.email_not_verified))
-                            hideProgressBar()
-                            enableViews()
                         }
                         POST_TIMEOUT -> {
-                            hideProgressBar()
-                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.post_timeout_correction))
                         }
                         USER_NOT_FOUND -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.user_not_found_error))
-                            hideProgressBar()
-                            enableViews()
                         }
                         USER_DISABLED -> {
                             (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
                             showSnackBarShort(this,binding.root,getString(R.string.error_try_again))
-                            hideProgressBar()
-                            enableViews()
                         }
                         TOKEN_EXPIRED -> {
-                            hideProgressBar()
-                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.token_expired_error))
                         }
                         MISSING_REFRESH_TOKEN -> {
-                            hideProgressBar()
-                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.missing_refresh_token_error))
                         }
                         NO_NETWORK -> {
-                            hideProgressBar()
-                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
                         }
                         else -> {
-                            hideProgressBar()
-                            enableViews()
                             showSnackBarShort(this,binding.root,getString(R.string.get_account_info_error))
                         }
                     }
@@ -146,10 +132,12 @@ class HouseCorrectionFragment : Fragment(),SnackBarAble,ProgressBarAble,Disablab
 
     override fun enableViews() {
         binding.editTextHouseCorrection.isEnabled = true
+        binding.buttonSendCorrection.isEnabled = true
     }
 
     override fun disableViews() {
         binding.editTextHouseCorrection.isEnabled = false
+        binding.buttonSendCorrection.isEnabled = false
     }
 
     fun EditText.checkCorrectionLength(lambda : (CorrectionLength) -> Unit) : Boolean {

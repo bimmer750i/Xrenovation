@@ -3,6 +3,7 @@ package broz.tito.xrenovation.presentation.adapters
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import broz.tito.xrenovation.R
 import broz.tito.xrenovation.databinding.CommentItemBinding
@@ -18,7 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class CommentsRecyclerViewAdapter : RecyclerView.Adapter<CommentsRecyclerViewAdapter.ViewHolder>() {
+class CommentsRecyclerViewAdapter(val commentOptionsClicker : (commentId : String,criminalLocalId : String) -> Boolean) : RecyclerView.Adapter<CommentsRecyclerViewAdapter.ViewHolder>() {
 
     private val TAG = "CommentsRecyclerViewAdapter"
 
@@ -53,6 +54,20 @@ class CommentsRecyclerViewAdapter : RecyclerView.Adapter<CommentsRecyclerViewAda
         holder.binding.textViewUserName.text = displayComment.comment.displayName
         holder.binding.textViewLocalId.text = displayComment.comment.localId
         holder.binding.textViewCommentText.text = displayComment.comment.text
+        holder.binding.imageViewReportViolation.setOnClickListener {
+            val popupMenu = PopupMenu(holder.binding.root.context, holder.binding.imageViewReportViolation)
+            popupMenu.menuInflater.inflate(R.menu.comment_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.report_comment_violation -> {
+                        commentOptionsClicker(displayComment.commentId,displayComment.comment.localId)
+                        true
+                    }
+                    else -> {false}
+                }
+            }
+            popupMenu.show()
+        }
     }
 
     inner class ViewHolder(val binding : CommentItemBinding) : RecyclerView.ViewHolder(binding.root)

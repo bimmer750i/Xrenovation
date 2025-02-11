@@ -13,9 +13,13 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import broz.tito.xrenovation.R
+import broz.tito.xrenovation.data.add_house.entities.FailureDataDeletionRequestResult
+import broz.tito.xrenovation.data.add_house.entities.PendingDataDeletionRequestResult
+import broz.tito.xrenovation.data.add_house.entities.SuccessDataDeletionRequestResult
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentAccountInfoBinding
 import broz.tito.xrenovation.presentation.dialogs.showEmailNotFoundDialog
+import broz.tito.xrenovation.presentation.interfaces.Disablable
 import broz.tito.xrenovation.presentation.interfaces.ProgressBarAble
 import broz.tito.xrenovation.presentation.interfaces.SnackBarAble
 import broz.tito.xrenovation.presentation.models.AccountInfoViewModel
@@ -26,7 +30,7 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
-class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
+class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble,Disablable {
 
     private var isLoaded = false
 
@@ -66,7 +70,12 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
             viewModel.sendEmailVerificationCode(requireContext())
         }
         binding.imageviewDisplayImage.setOnClickListener {
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            try {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+            catch (e : Exception) {
+                showSnackBarShort(this,binding.root,getString(R.string.photopicker_exception))
+            }
         }
         binding.swipeRefreshLayoutFragmentAccountInfo.setOnRefreshListener {
             viewModel.getAccountInfo(requireContext())
@@ -77,6 +86,9 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         }
         binding.textViewEmailNotFoundAccountInfo.setOnClickListener {
             showEmailNotFoundDialog(requireContext())
+        }
+        binding.cardviewRequestAccountAndDataDeletion.setOnClickListener {
+            showDeleteDataDialog()
         }
         viewModel.getAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
@@ -89,36 +101,35 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                     if (it.user.displayName == null) {
                         viewModel.setAccountInfo(requireContext(),"user-${it.user.localId?.take(10)}",null)
                     }
-                    else {
-                        hideProgressBar()
-                        binding.textviewHiSomeone.visibility = View.VISIBLE
-                        binding.textviewHiSomeone.text = "${getString(R.string.hi_someone)}${it.user.displayName}"
-                        binding.cardviewEmailVerified.visibility = View.VISIBLE
-                        binding.cardviewLogOut.visibility = View.VISIBLE
-                        it.user.photoUrl?.let {url ->
-                            Glide
-                                .with(requireContext())
-                                .load(url)
-                                .centerCrop()
-                                .into(binding.imageviewDisplayImage)
+
+                    hideProgressBar()
+                    binding.textviewHiSomeone.visibility = View.VISIBLE
+                    binding.textviewHiSomeone.text = "${getString(R.string.hi_someone)}${it.user.displayName}"
+                    binding.cardviewEmailVerified.visibility = View.VISIBLE
+                    binding.cardviewRequestAccountAndDataDeletion.visibility = View.VISIBLE
+                    binding.cardviewLogOut.visibility = View.VISIBLE
+                    it.user.photoUrl?.let {url ->
+                        Glide
+                            .with(requireContext())
+                            .load(url)
+                            .centerCrop()
+                            .into(binding.imageviewDisplayImage)
+                    }
+                    it.user.email?.let {
+                        binding.textViewEmail.text = it
+                    }
+                    it.user.emailVerified?.let {
+                        if (it) {
+                            binding.imageviewEmailVerified.setImageResource(R.drawable.baseline_verified_user_24)
+                            binding.textViewIsEmailVerified.text = getString(R.string.email_verified)
+                            hideEmailNotFoundText()
                         }
-                        it.user.email?.let {
-                            binding.textViewEmail.text = it
-                        }
-                        it.user.emailVerified?.let {
-                            if (it) {
-                                binding.imageviewEmailVerified.setImageResource(R.drawable.baseline_verified_user_24)
-                                binding.textViewIsEmailVerified.text = getString(R.string.email_verified)
-                                hideEmailNotFoundText()
-                            }
-                            else {
-                                binding.imageviewEmailVerified.setImageResource(R.drawable.baseline_cancel_24)
-                                binding.textViewIsEmailVerified.text = getString(R.string.email_not_verified)
-                                binding.buttonVerifyEmail.visibility = View.VISIBLE
-                            }
+                        else {
+                            binding.imageviewEmailVerified.setImageResource(R.drawable.baseline_cancel_24)
+                            binding.textViewIsEmailVerified.text = getString(R.string.email_not_verified)
+                            binding.buttonVerifyEmail.visibility = View.VISIBLE
                         }
                     }
-
                 }
                 is FailureGetAccountInfoResult -> {
                     isLoaded = false
@@ -157,6 +168,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
             when (it) {
                 is PendingUploadProfilePictureResult -> {
                     showProgressBar()
+                    disableViews()
                 }
                 is SuccessUploadProfilePictureResult -> {
                     viewModel.setAccountInfo(requireContext(),null,it.url)
@@ -164,6 +176,7 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
                 }
                 is FailureUploadProfilePictureResult -> {
                     hideProgressBar()
+                    enableViews()
                     showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.picture_not_uploaded))
                     viewModel.resetUploadProfilePictureResult()
                 }
@@ -171,17 +184,39 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         }
         viewModel.setAccountInfoResult.observe(viewLifecycleOwner) {
             when (it) {
-                is PendingSetAccountInfoResult -> {
-                    // Nothing to do here, but keeping this
-                }
                 is SuccessSetAccountInfoResult -> {
+                    enableViews()
                     viewModel.getAccountInfo(requireContext())
                     viewModel.resetSetAccountInfoResult()
                 }
                 is FailureSetAccountInfoResult -> {
+                    enableViews()
                     hideProgressBar()
                     showSnackBarShort(this,binding.fragmentAccountInfoLayout,getString(R.string.set_account_info_error))
                     viewModel.resetSetAccountInfoResult()
+                }
+            }
+        }
+
+        viewModel.dataDeletionRequestResult.observe(viewLifecycleOwner) {
+            when(it) {
+                is PendingDataDeletionRequestResult -> {
+                    disableViews()
+                    showProgressBar()
+                }
+                is SuccessDataDeletionRequestResult -> {
+                    viewModel.logOut(requireContext())
+                    (requireActivity().application as App).loggedStatus = LoggedStatus.LOGGED_OUT
+                    safeNavigate(this,R.id.accountInfoFragment,R.id.action_accountInfoFragment_to_accountFragment)
+                }
+                is FailureDataDeletionRequestResult -> {
+                    enableViews()
+                    hideProgressBar()
+                    when (it.errorMessage) {
+                        NO_NETWORK -> showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
+                        INVALID_ID_TOKEN -> showSnackBarShort(this,binding.root,getString(R.string.refresh_account_screen))
+                        else -> showSnackBarShort(this,binding.root,getString(R.string.no_network_try_again))
+                    }
                 }
             }
         }
@@ -258,12 +293,36 @@ class AccountInfoFragment : Fragment(), ProgressBarAble, SnackBarAble {
         dialog.show()
     }
 
+    private fun showDeleteDataDialog() {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(R.string.request_account_and_data_deletion_title)
+            .setMessage(R.string.request_account_and_data_deletion_message)
+            .setPositiveButton(R.string.yes) { dialogInterface, num ->
+                viewModel.addDataDeletionRequestResult(requireContext())
+                dialogInterface.cancel()
+            }
+            .setNegativeButton(R.string.no) { dialogInterface, num ->
+                dialogInterface.cancel()
+            }
+            .create()
+        dialog.show()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(ACCOUNT_INFO_LOADED,isLoaded)
         outState.putBoolean(EMAIL_VERIFIED_KEY,verificationEmailSent)
     }
 
+    override fun enableViews() {
+        binding.cardviewLogOut.isEnabled = true
+        binding.imageviewDisplayImage.isEnabled = true
+    }
+
+    override fun disableViews() {
+        binding.cardviewLogOut.isEnabled = false
+        binding.imageviewDisplayImage.isEnabled = false
+    }
 
     override fun showProgressBar() {
         binding.progressBarAccountInfo.visibility = View.VISIBLE

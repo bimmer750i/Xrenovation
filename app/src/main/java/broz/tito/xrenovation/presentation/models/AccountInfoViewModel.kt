@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import broz.tito.xrenovation.data.add_house.entities.DataDeletionRequest
+import broz.tito.xrenovation.data.add_house.entities.DataDeletionRequestResult
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.data.sharedprefs.SharedPrefsModel
 import broz.tito.xrenovation.domain.*
@@ -23,6 +25,7 @@ class AccountInfoViewModel @Inject constructor(val getAccountInfoUseCase: GetAcc
                                                val uploadProfilePictureUseCase: UploadProfilePictureUseCase,
                                                val setAccountInfoUseCase: SetAccountInfoUseCase,
                                                val verifyEmailUseCase : SendEmailVerificationCodeUseCase,
+                                               val dataDeletionRequestUseCase: DataDeletionRequestUseCase,
                                                val sharedPrefsModel: SharedPrefsModel) : ViewModel() {
 
     private val _getAccountInfoResult = MutableLiveData<GetAccountInfoResult>()
@@ -36,6 +39,9 @@ class AccountInfoViewModel @Inject constructor(val getAccountInfoUseCase: GetAcc
 
     private val _verifyEmailResult  = MutableLiveData<VerifyEmailResult>()
     val verifyEmailResult : LiveData<VerifyEmailResult> = _verifyEmailResult
+
+    private val _dataDeletionRequestResult  = MutableLiveData<DataDeletionRequestResult>()
+    val dataDeletionRequestResult : LiveData<DataDeletionRequestResult> = _dataDeletionRequestResult
 
     fun logOut(context: Context) {
         logOutUseCase(context)
@@ -92,6 +98,14 @@ class AccountInfoViewModel @Inject constructor(val getAccountInfoUseCase: GetAcc
         viewModelScope.launch(Dispatchers.IO) {
             verifyEmailUseCase(sharedPrefsModel.getIdToken(context)).onEach {
                 _verifyEmailResult.postValue(it)
+            }.collect()
+        }
+    }
+
+    fun addDataDeletionRequestResult(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataDeletionRequestUseCase(sharedPrefsModel.getLocalId(context),DataDeletionRequest(sharedPrefsModel.getLocalId(context)),sharedPrefsModel.getIdToken(context)).onEach {
+                _dataDeletionRequestResult.postValue(it)
             }.collect()
         }
     }

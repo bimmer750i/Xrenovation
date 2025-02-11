@@ -103,6 +103,9 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             savedInstanceState.getString(FLOORS)?.let {
                 floors = it
             }
+            savedInstanceState.getString(ADDRESS)?.let {
+                houseAddress = it
+            }
         }
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,addHouseViewModelFactory)[AddHouseViewModel::class.java]
@@ -167,7 +170,12 @@ class AddHouseFragment : Fragment(), SnackBarAble,ProgressBarAble,Disablable {
             }
         }
         binding.imageViewAddButton.setOnClickListener {
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            try {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+            catch (e : Exception) {
+                showSnackBarShort(this,binding.root,getString(R.string.photopicker_exception))
+            }
         }
         binding.chipAddUrl.setOnClickListener {
             showAddUrlAlertDialog("",false,null)

@@ -179,6 +179,12 @@
             <action
                 android:id="@+id/action_houseFragment_to_houseCorrectionFragment"
                 app:destination="@id/houseCorrectionFragment" />
+            <action
+                android:id="@+id/action_houseFragment_to_reportViolationFragment"
+                app:destination="@id/reportViolationFragment" >
+                <argument
+                    android:name="commentId" />
+            </action>
         </fragment>
         <fragment
             android:id="@+id/houseCorrectionFragment"
@@ -190,6 +196,17 @@
                 app:argType="string"
                 app:nullable="false"
                 android:defaultValue=""/>
+        </fragment>
+        <fragment
+            android:id="@+id/reportViolationFragment"
+            android:name="broz.tito.xrenovation.presentation.ReportViolationFragment"
+            android:label="ReportViolationFragment" >
+            <argument
+                android:name="commentId"
+                app:argType="string" />
+            <argument
+                android:name="criminalLocalId"
+                app:argType="string" />
         </fragment>
     </navigation>
 </navigation>

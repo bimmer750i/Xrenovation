@@ -7,8 +7,8 @@ import javax.inject.Inject
 
 class AddHousePointUseCase @Inject constructor(val repository: AddHouseRepository) {
 
-    operator fun invoke(housePoint: HousePoint,houseId: String,accessToken : String) : Flow<AddHousePointResult> {
-        return repository.addHousePoint(housePoint,houseId,accessToken)
+    operator fun invoke(housePoint: HousePoint,houseId: String,accessToken : String,localId : String) : Flow<AddHousePointResult> {
+        return repository.addHousePoint(housePoint,houseId,accessToken,localId)
     }
 
 }

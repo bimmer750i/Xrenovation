@@ -3,11 +3,9 @@ package broz.tito.xrenovation.presentation
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.EditText
 import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
@@ -21,7 +19,6 @@ import broz.tito.xrenovation.data.add_house.POST_TIMEOUT
 import broz.tito.xrenovation.data.add_house.entities.*
 import broz.tito.xrenovation.data.auth.entities.*
 import broz.tito.xrenovation.databinding.FragmentHouseBinding
-import broz.tito.xrenovation.presentation.HouseCorrectionFragment.CorrectionLength
 import broz.tito.xrenovation.presentation.adapters.CommentsRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.adapters.PhotoRecyclerViewAdapter
 import broz.tito.xrenovation.presentation.interfaces.Disablable
@@ -57,7 +54,16 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
         (requireActivity().application as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this,houseFragmentViewModelFactory)[HouseFragmentViewModel::class.java]
         adapter = PhotoRecyclerViewAdapter(PhotoRecyclerViewAdapter.DISPLAY_PHOTO_VIEWHOLDER) {}
-        commentsAdapter = CommentsRecyclerViewAdapter()
+        commentsAdapter = CommentsRecyclerViewAdapter { commentId, criminalLocalId ->
+            val directions =
+                HouseFragmentDirections.actionHouseFragmentToReportViolationFragment(
+                    commentId,
+                    criminalLocalId
+                )
+            safeNavigate(this, R.id.houseFragment, directions)
+            return@CommentsRecyclerViewAdapter true
+        }
+
     }
 
     override fun onCreateView(
@@ -182,6 +188,7 @@ class HouseFragment : Fragment(),SnackBarAble,Disablable {
             when (it) {
                 is SuccessGetCommentsResult -> {
                     if (it.commentsList.size > 0) {
+                        binding.textViewNoComments.visibility = View.GONE
                         binding.recyclerviewComments.visibility = View.VISIBLE
                         commentsAdapter.commentItems = it.commentsList
                     }

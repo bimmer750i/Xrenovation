@@ -91,7 +91,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="7dp"
             android:padding="10dp"
-            android:visibility="visible"
             app:cardCornerRadius="7dp"
             app:cardElevation="3dp"
             app:cardPreventCornerOverlap="true"
@@ -135,6 +134,46 @@
                     app:cpb_selectorIdle="@drawable/cpb_selector"
                     app:cpb_textIdle="@string/button_send_email_verification" />
 
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardview_request_account_and_data_deletion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:padding="10dp"
+            android:visibility="gone"
+            app:cardCornerRadius="7dp"
+            app:cardElevation="3dp"
+            app:cardPreventCornerOverlap="true"
+            app:cardUseCompatPadding="true"
+            app:contentPadding="10dp">
+
+            <LinearLayout
+                android:id="@+id/linear_layout_request_account_and_data_deletion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imageview_request_account_and_data_deletion"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:paddingEnd="10dp"
+                    android:src="@drawable/baseline_delete_forever_24"
+                    app:civ_border_color="@color/black" />
+
+                <TextView
+                    android:id="@+id/textView_request_account_and_data_deletion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:text="@string/request_account_and_data_deletion" />
 
             </LinearLayout>
 

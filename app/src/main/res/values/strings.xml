@@ -17,7 +17,7 @@
     <string name="email_not_found">Can\'t find the email?</string>
     <string name="email_not_found_text">1) Make sure that the correct email address was entered during registration. If an incorrect email address was specified during registration, create an account with a new email address.\n2) Check the \"Spam\" folder on your mail, it is likely that the email may end up there.</string>
     <string name="ok">OK</string>
-    <string name="incorrect_email">Incorrect Email</string>
+    <string name="incorrect_email">Incorrect Email format</string>
     <string name="different_passwords">The passwords are different</string>
     <string name="weak_password">The password must be at least 6 characters long</string>
     <string name="sign_up_exception">Registration error, please try again later</string>
@@ -83,24 +83,25 @@
     <string name="add_url">Add URL</string>
     <string name="cancel">Cancel</string>
     <string name="no_address_selected">Enter address</string>
-    <string name="incorrect_address">Incorrect address</string>
+    <string name="incorrect_address">The address inside input field doesn\'t match with the actual address</string>
     <string name="no_floors_entered">Enter the number of floors</string>
     <string name="no_flats_entered">Enter the number of flats</string>
     <string name="no_year_entered">Enter the construction year</string>
     <string name="no_description_added">The description is too short</string>
     <string name="no_photos_selected">Select at least 1 photo</string>
     <string name="no_house_in_address">The address doesn\'t have a house</string>
-    <string name="house_added">House added successfully</string>
+    <string name="house_added">The house is being moderated</string>
     <string name="send_comment">Send</string>
     <string name="leave_comment">Leave comment here</string>
     <string name="comments">Comments</string>
-    <string name="suggest_house_correction">Suggest correction</string>
-    <string name="correction_added">The correction is under moderation</string>
-    <string name="correction_too_short_error">The correction must be at least 20 symbols long</string>
-    <string name="correction_too_long_error">The correction must be less 150 symbols long</string>
-    <string name="post_timeout_house">Timeout, upload your house later, please</string>
-    <string name="post_timeout_comment">Timeout, add your comment later, please</string>
-    <string name="post_timeout_correction">Timeout, add your correction later, please</string>
+    <string name="suggest_house_correction">Suggest correction or report a violation</string>
+    <string name="correction_added">Added successfully</string>
+    <string name="correction_too_short_error">The text must be at least 20 symbols long</string>
+    <string name="correction_too_long_error">The text must be less 150 symbols long</string>
+    <string name="report_added">Report added successfully</string>
+    <string name="post_timeout_house">Time limit reached, upload your house later, please</string>
+    <string name="post_timeout_comment">Time limit reached, add your comment later, please</string>
+    <string name="post_timeout_correction">Time limit reached, try again later, please</string>
     <string name="user_not_logged_in">Log into yor account or sign up</string>
     <string name="comment_under_moderation">The comment is under moderation</string>
     <string name="failed_to_send_comment">Failed to send comment</string>
@@ -109,5 +110,33 @@
     <string name="long_comment">Should be less than 80 symbols</string>
     <string name="failed_to_upload_photos">Failed to upload photos</string>
     <string name="continue_to_xrenovation">Continue</string>
-    <string name="welcome_text">Welcome to xRenovation!\n\n This is a place where you can discuss or add houses built during the Renovation program, you can also suggest a correction to existing houses.\nThe rules are simple:\n\n1) Suggested houses must be built/being built under the Renovation program. Information about house must be relevant, in case of irrelevant information the Administration might not approve the suggested house or edit the information.\n\n2) Comments should relate to a specific house, not to anything else. The administration may not publish a comment in case of non-compliance with the requirement.\n\n3) The corrections you make should relate to a specific house, not to anything else. The administration may not accept the correction in case of non-compliance with the requirement.\n\n4) In case of offering harsh political statements and materials of the nature of 18+ or other controversial content, the user\'s account will be blocked and the material will not be published.\n\n5) By clicking the \"Continue\" button you confirm that you agree with the rules listed above</string>
+    <string name="welcome_text">Welcome to xRenovation!\n\n
+    This is a place where you can discuss and add houses built under the renovation program, as well as suggest corrections to already added houses.\n
+    The rules are simple:\n\n
+    1) Suggested houses must be either built or under construction as part of the renovation program. The house information must be accurate. Spam is strictly prohibited. If the information is incorrect, the administration may refuse to add the house to the map or correct it.\n\n
+    2) Comments must be related to a specific house and nothing else. Spam is strictly prohibited. The administration may choose not to publish a comment if it does not meet this requirement.\n\n
+    3) Suggested corrections must be related to a specific house and nothing else. Spam is strictly prohibited. The administration may reject them if they do not meet this requirement.\n\n
+    4) In case of repeated violations of rules 1, 2, or 3, the user may be blocked, and content may be removed.\n\n
+    5) The publication of the following content is prohibited:\n\n
+    - Sexually explicit content\n
+    - Content involving child abuse, exploitation, sexualization of children, sexual extortion, or child trafficking\n
+    - Profanity or obscene language\n
+    - Hate speech against any groups of people\n
+    - Calls for violence\n
+    - Justification of terrorism or calls for terrorist acts\n
+    - Promotion of destructive ideologies\n
+    - Mockery of or profiting from confidential events\n
+    - Threats, harassment, bullying, or intimidation\n
+    - Advertising or sale announcements\n
+    - Any illegal activity\n
+    - Personal or confidential information (e.g., phone numbers, emails, exact owner details)\n
+    - Any content that violates Google Play policies\n\n
+    If rule 5 is violated, the content will be removed, and the user will be blocked.\n\n
+    6) By clicking the \"Continue\" button, you agree to the above rules.</string>
+    <string name="request_account_and_data_deletion">Request account and data deletion</string>
+    <string name="request_account_and_data_deletion_title">Request account and data deletion?</string>
+    <string name="request_account_and_data_deletion_message">A request for account and data deletion will be created!</string>
+    <string name="refresh_account_screen">Please refresh account info screen and try again</string>
+    <string name="report_comment_violation">Report comment or user</string>
+    <string name="photopicker_exception">Exception occurred. Try updating phone or google play services.</string>
 </resources>

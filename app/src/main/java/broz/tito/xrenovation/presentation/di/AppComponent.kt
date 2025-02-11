@@ -35,6 +35,8 @@ interface AppComponent {
 
     fun inject(welcomeFragment: WelcomeFragment)
 
+    fun inject(reportViolationFragment: ReportViolationFragment)
+
     @Component.Builder
     interface Builder {
 

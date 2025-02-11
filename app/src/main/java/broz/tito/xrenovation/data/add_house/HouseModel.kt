@@ -32,7 +32,8 @@ import javax.inject.Inject
 
 const val POST_TIMEOUT = "POST_TIMEOUT"
 const val CITY_NOT_FOUND = "CITY_NOT_FOUND"
-const val POST_DELAY_INTERVAL : Long = 10_000
+const val POST_DELAY_INTERVAL : Long = 7200_000 //2 HOURS
+private var anonymous_last_time_posted : Long = 15_000
 
 class HouseModel @Inject constructor(val searchManager: SearchManager, val storageReference : StorageReference, val houseService: HouseService, val timeService: TimeService) {
 
@@ -112,10 +113,10 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
         }
     }.flowOn(Dispatchers.Main)
 
-    fun loadPhotosToFireBase(localId: String,path: String, list : ArrayList<String>) : Flow<LoadPhotosResult> = flow<LoadPhotosResult> {
+    fun loadPhotosToFireBase(localId: String,path: String, list : ArrayList<String>,accessToken: String) : Flow<LoadPhotosResult> = flow<LoadPhotosResult> {
         var result : LoadPhotosResult = PendingLoadPhotosResult()
         emit(result)
-        val lastTimePosted = getLastTimePosted(localId)
+        val lastTimePosted = getLastTimePosted(localId,accessToken)
         val now = getTime() ?: TimeHelper.getUtcTime()
         if (lastTimePosted != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
             result = FailureLoadPhotosResult(POST_TIMEOUT)
@@ -159,7 +160,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                                 }
                             }
                             else {
-                                throw Exception("FAILED_TO_DOWNLOAD")
+                                throw Exception("FAILED_TO_GET_URL_OF_LOADED_FILE")
                             }
                         }
             }
@@ -176,44 +177,31 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
     }
 
 
-    fun addHouse(localId: String, name : String, body : House, accessToken : String) : Flow<AddHouseResult> = flow {
+    fun addHouse(body : House, accessToken : String) : Flow<AddHouseResult> = flow {
         var result : AddHouseResult = PendingAddHouseResult()
         emit(result)
-        val lastTimePosted = getLastTimePosted(localId)
-        val now = getTime() ?: TimeHelper.getUtcTime()
-        if (lastTimePosted?.lastTimePosted != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
-            result = FailureAddHouseResult(POST_TIMEOUT)
-            Log.d(TAG, "addHouse -- failure: POST_TIMEOUT")
-        }
-        else if (lastTimePosted?.lastTimePosted != null)  {
-            try {
-                val response = houseService.addHouse(body,accessToken)
-                Log.d(TAG, "addHouse: ${response.raw()}")
-                if (!response.isSuccessful) {
-                    result = FailureAddHouseResult(response.body().toString())
-                    Log.d(TAG, "addHouse -- failure -- ${response.code()}")
-                }
-                else {
-                    response.body()?.let {
-                        Log.d(TAG, "addHouse -- success: ${it}")
-                        result = SuccessAddHouseResult(it)
-                        addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
-                    }
+        try {
+            val response = houseService.addHouse(body,accessToken)
+            Log.d(TAG, "addHouse: ${response.raw()}")
+            if (!response.isSuccessful) {
+                result = FailureAddHouseResult(response.body().toString())
+                Log.d(TAG, "addHouse -- failure -- ${response.code()}")
+            }
+            else {
+                response.body()?.let {
+                    Log.d(TAG, "addHouse -- success: ${it}")
+                    result = SuccessAddHouseResult(it)
                 }
             }
-            catch (e : Exception) {
-                result = FailureAddHouseResult(e.message.toString())
-                Log.d(TAG, "addHouse -- failure -- ${e.message.toString()}")
-            }
         }
-        else {
-            result = FailureAddHouseResult(POST_TIMEOUT)
-            Log.d(TAG, "addHouse -- failure: POST_TIMEOUT")
+        catch (e : Exception) {
+            result = FailureAddHouseResult(e.message.toString())
+            Log.d(TAG, "addHouse -- failure -- ${e.message.toString()}")
         }
         emit(result)
     }.flowOn(Dispatchers.IO)
 
-    fun addHousePoint(body : HousePoint, houseId : String, accessToken : String) : Flow<AddHousePointResult> = flow {
+    fun addHousePoint(body : HousePoint, houseId : String, accessToken : String,localId: String) : Flow<AddHousePointResult> = flow {
         var result : AddHousePointResult = PendingAddHousePointResult()
         emit(result)
         try {
@@ -226,6 +214,8 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 response.body()?.let {
                     Log.d(TAG, "addHouse_Point -- success: ${it}")
                     result = SuccessAddHousePointResult(it)
+                    val now = getTime() ?: TimeHelper.getUtcTime()
+                    addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
                 }
             }
         }
@@ -287,14 +277,14 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
     fun addComment(localId: String,houseId: String,comment: Comment, accessToken : String) : Flow<AddCommentResult> = flow {
         var result : AddCommentResult = PendingAddCommentResult()
         emit(result)
-        val lastTimePosted = getLastTimePosted(localId)
+        val lastTimePosted = getLastTimePosted(localId,accessToken)
         val now = getTime() ?: TimeHelper.getUtcTime()
         Log.d(TAG, "addComment -- lastTimePosted: ${lastTimePosted?.lastTimePosted}")
-        if (lastTimePosted?.lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
+        if (lastTimePosted?.lastTimePosted != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
             result = FailureAddCommentResult(POST_TIMEOUT)
             Log.d(TAG, "addComment -- failure: POST_TIMEOUT")
         }
-        else if (lastTimePosted?.lastTimePosted != null && now != null)  {
+        else if (lastTimePosted?.lastTimePosted != null)  {
             try {
                 comment.timeAdded = now
                 val response = houseService.addComment(comment,accessToken)
@@ -357,16 +347,16 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
     fun addHouseCorrection(localId : String, body : HouseCorrection, accessToken : String) : Flow<AddHouseCorrectionResult> = flow {
         var result : AddHouseCorrectionResult = PendingAddHouseCorrectionResult()
         emit(result)
-        val lastTimePosted = getLastTimePosted(localId)
+        val lastTimePosted : Long = getLastTimePosted(localId,accessToken)?.lastTimePosted ?: anonymous_last_time_posted
         val now = getTime() ?: TimeHelper.getUtcTime()
-        if (lastTimePosted != null && now != null && (now - lastTimePosted.lastTimePosted < POST_DELAY_INTERVAL)) {
+        if (now - lastTimePosted < 20_000) {
                 result = FailureAddHouseCorrectionResult(POST_TIMEOUT)
                 Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
         }
-        else if (lastTimePosted != null && now != null) {
+        else  {
             try {
                 body.timeAdded = now
-                val response = houseService.addHouseCorrection(body,accessToken)
+                val response = houseService.addHouseCorrection(body)
                 if (!response.isSuccessful) {
                     result = FailureAddHouseCorrectionResult(response.body().toString())
                     Log.d(TAG, "addHouseCorrection -- failure: ${response.body().toString()}")
@@ -376,7 +366,9 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                         it.name?.let {
                             Log.d(TAG, "addHouseCorrection -- success: $it")
                             result = SuccessAddHouseCorrectionResult(it)
-                            addLastTimePosted(localId,LastTimePosted(localId,now),accessToken)
+                            if (localId.isEmpty()) {
+                                anonymous_last_time_posted = now
+                            }
                         }
                     }
                 }
@@ -386,17 +378,67 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 Log.d(TAG, "addHouseCorrection -- failure: ${e.message}")
             }
         }
-        else {
-            result = FailureAddHouseCorrectionResult(POST_TIMEOUT)
-            Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
+        emit(result)
+    }.flowOn(Dispatchers.IO)
+
+    fun deleteDataRequest(localId : String, body : DataDeletionRequest, accessToken : String) : Flow<DataDeletionRequestResult> = flow {
+        var result : DataDeletionRequestResult = PendingDataDeletionRequestResult()
+        emit(result)
+        try {
+            val response = houseService.addDataDeletionRequest(body, localId, accessToken)
+            if (!response.isSuccessful) {
+                result = FailureDataDeletionRequestResult(response.message())
+            }
+            else {
+                response.body()?.let {
+                    result = SuccessDataDeletionRequestResult(it.name.toString())
+                }
+            }
+        }
+        catch (e : Exception) {
+            result = FailureDataDeletionRequestResult(e.message.toString())
         }
         emit(result)
     }.flowOn(Dispatchers.IO)
 
-    suspend fun getLastTimePosted(localId: String) : LastTimePosted? {
+
+    fun addDataViolation(localId : String, body : ReportViolation, accessToken : String) : Flow<ReportViolationResult> = flow {
+        var result : ReportViolationResult = PendingReportViolationResult()
+        emit(result)
+        val lastTimePosted : Long = getLastTimePosted(localId,accessToken)?.lastTimePosted ?: anonymous_last_time_posted
+        val now = getTime() ?: TimeHelper.getUtcTime()
+        if (now - lastTimePosted < 20_000) {
+            result = FailureReportViolationResult(POST_TIMEOUT)
+            Log.d(TAG, "addHouseCorrection -- failure: POST_TIMEOUT")
+        }
+        else {
+            try {
+                val response = houseService.addReportViolation(body, localId)
+                if (!response.isSuccessful) {
+                    Log.d(TAG, "addDataViolation error: ${response.message()}")
+                    result = FailureReportViolationResult(response.message())
+                }
+                else {
+                    response.body()?.let {
+                        result = SuccessReportViolationResult(it.name.toString())
+                        if (localId.isEmpty()) {
+                            anonymous_last_time_posted = now
+                        }
+                    }
+                }
+            }
+            catch (e : Exception) {
+                result = FailureReportViolationResult(e.message.toString())
+                Log.d(TAG, "addDataViolation exception: ${e.message.toString()}")
+            }
+        }
+        emit(result)
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getLastTimePosted(localId: String,accessToken: String) : LastTimePosted? {
         val result : LastTimePosted? = CoroutineScope(Dispatchers.IO).async {
             try {
-                val response = houseService.getLastTimePosted(localId)
+                val response = houseService.getLastTimePosted(localId,accessToken)
                 if (!response.isSuccessful) {
                     Log.d(TAG, "getLastTimePosted -- failure: ${response.body().toString()}")
                     return@async null
@@ -413,7 +455,7 @@ class HouseModel @Inject constructor(val searchManager: SearchManager, val stora
                 }
             }
             catch (e : Exception) {
-                Log.d(TAG, "getLastTimePosted -- failure: ${e.message}")
+                Log.d(TAG, "getLastTimePosted -- exception: ${e.message}")
                 return@async null
             }
         }.await()

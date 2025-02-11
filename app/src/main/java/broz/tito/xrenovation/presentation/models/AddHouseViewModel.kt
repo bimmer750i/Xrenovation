@@ -189,7 +189,7 @@ class AddHouseViewModel @Inject constructor(val getAccountInfoUseCase: GetAccoun
 
     private suspend fun addHousePoint(context: Context,houseId: String,housePoint: HousePoint) : AddHousePointResult = coroutineScope {
         async {
-            addHousePointUseCase(housePoint,houseId,sharedPrefsModel.getIdToken(context)).last()
+            addHousePointUseCase(housePoint,houseId,sharedPrefsModel.getIdToken(context),sharedPrefsModel.getLocalId(context)).last()
         }.await()
     }
 
@@ -206,7 +206,7 @@ class AddHouseViewModel @Inject constructor(val getAccountInfoUseCase: GetAccoun
 
     private suspend fun loadPhotosToFireBase(context: Context,path : String,list : ArrayList<String>) : LoadPhotosResult = coroutineScope {
         async {
-            loadPhotosToFireBaseUseCase(sharedPrefsModel.getLocalId(context),path,list).last()
+            loadPhotosToFireBaseUseCase(sharedPrefsModel.getLocalId(context),path,list,sharedPrefsModel.getIdToken(context)).last()
         }.await()
     }
 

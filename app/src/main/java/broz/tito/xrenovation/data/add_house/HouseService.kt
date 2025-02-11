@@ -28,11 +28,17 @@ interface HouseService {
     suspend fun addComment(@Body comment: Comment, @Query("auth") accessToken : String) : Response<AddCommentResponse>
 
     @POST("corrections.json")
-    suspend fun addHouseCorrection(@Body houseCorrection: HouseCorrection, @Query("auth") accessToken : String) : Response<AddHouseCorrectionResponse>
+    suspend fun addHouseCorrection(@Body houseCorrection: HouseCorrection/*, @Query("auth") accessToken : String*/) : Response<AddHouseCorrectionResponse>
 
     @PUT("timePosted/{localId}.json")
     suspend fun addLastTimePosted(@Path("localId") localId : String, @Body body : LastTimePosted, @Query("auth") accessToken : String) : Response<LastTimePosted>
 
     @GET("timePosted/{localId}.json")
-    suspend fun getLastTimePosted(@Path("localId") localId : String) : Response<LastTimePosted>
+    suspend fun getLastTimePosted(@Path("localId") localId : String, @Query("auth") accessToken : String) : Response<LastTimePosted>
+
+    @PUT("data_deletion_requests/{localId}.json")
+    suspend fun addDataDeletionRequest(@Body body : DataDeletionRequest, @Path("localId") localId : String, @Query("auth") accessToken : String) : Response<DataDeletionRequestResponse>
+
+    @PUT("donos/{localId}.json")
+    suspend fun addReportViolation(@Body body : ReportViolation, @Path("localId") localId : String) : Response<ReportViolationResponse>
 }

@@ -18,16 +18,16 @@ class AddHouseRepositoryImpl @Inject constructor(val model: HouseModel) : AddHou
         return model.searchPoint(point)
     }
 
-    override fun loadPhotosToFireBase(localId: String,path : String, list: ArrayList<String>): Flow<LoadPhotosResult> {
-        return model.loadPhotosToFireBase(localId,path, list)
+    override fun loadPhotosToFireBase(localId: String,path : String, list: ArrayList<String>,accessToken: String): Flow<LoadPhotosResult> {
+        return model.loadPhotosToFireBase(localId,path, list,accessToken)
     }
 
     override fun addHouse(localId: String,name: String, house: House,accessToken : String): Flow<AddHouseResult> {
-        return model.addHouse(localId,name,house,accessToken)
+        return model.addHouse(house,accessToken)
     }
 
-    override fun addHousePoint(housePoint: HousePoint,houseId: String,accessToken : String): Flow<AddHousePointResult> {
-        return model.addHousePoint(housePoint,houseId,accessToken)
+    override fun addHousePoint(housePoint: HousePoint,houseId: String,accessToken : String,localId: String): Flow<AddHousePointResult> {
+        return model.addHousePoint(housePoint,houseId,accessToken,localId)
     }
 
     override fun getPoints(): Flow<GetPointResult> {
@@ -50,6 +50,15 @@ class AddHouseRepositoryImpl @Inject constructor(val model: HouseModel) : AddHou
         return model.addHouseCorrection(localId,houseCorrection,accessToken)
     }
 
+    override fun addDataDeletionRequest(
+        localId: String,
+        dataDeletionRequest: DataDeletionRequest,
+        accessToken: String
+    ): Flow<DataDeletionRequestResult> {
+        return model.deleteDataRequest(localId,dataDeletionRequest,accessToken)
+    }
 
-
+    override fun addDataViolation(localId : String, body : ReportViolation, accessToken : String) : Flow<ReportViolationResult> {
+        return model.addDataViolation(localId, body, accessToken)
+    }
 }

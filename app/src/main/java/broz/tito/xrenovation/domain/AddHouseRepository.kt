@@ -12,11 +12,11 @@ interface AddHouseRepository {
 
     fun searchPoint(point: Point) : Flow<SearchPointResult>
 
-    fun loadPhotosToFireBase(localId: String,path : String, list : ArrayList<String>) : Flow<LoadPhotosResult>
+    fun loadPhotosToFireBase(localId: String,path : String, list : ArrayList<String>,accessToken: String) : Flow<LoadPhotosResult>
 
     fun addHouse(localId: String,name : String, house: House,accessToken : String) : Flow<AddHouseResult>
 
-    fun addHousePoint(housePoint: HousePoint,houseId: String,accessToken : String) : Flow<AddHousePointResult>
+    fun addHousePoint(housePoint: HousePoint,houseId: String,accessToken : String,localId: String) : Flow<AddHousePointResult>
 
     fun getPoints() : Flow<GetPointResult>
 
@@ -27,5 +27,9 @@ interface AddHouseRepository {
     fun getComments(houseId: String) : Flow<GetCommentsResult>
 
     fun addHouseCorrection(localId : String,houseCorrection: HouseCorrection,accessToken : String) : Flow<AddHouseCorrectionResult>
+
+    fun addDataDeletionRequest(localId: String, dataDeletionRequest: DataDeletionRequest, accessToken: String) : Flow<DataDeletionRequestResult>
+
+    fun addDataViolation(localId : String, body : ReportViolation, accessToken : String) : Flow<ReportViolationResult>
 
 }
